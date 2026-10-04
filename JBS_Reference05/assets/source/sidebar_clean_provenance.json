@@ -1,0 +1,21 @@
+{
+  "kind": "generated image edit, not recovered original layers",
+  "source": "../sidebar_art.png",
+  "source_size": [
+    248,
+    245
+  ],
+  "output": "../sidebar_clean.png",
+  "output_size": [
+    1254,
+    1254
+  ],
+  "intent": "Remove baked old back figure, hair, hands, vest and glow; preserve pink-purple city/crystals and MORE POWER / MORE POSSIBILITIES slogan.",
+  "creation": "Built-in image generation tool; visually inspected locally",
+  "alpha_required": false,
+  "foreground": "Runtime crops bottom 37.5 percent of same PNG; no transparent cutout claimed.",
+  "runtime_mapping": "Config.AssetIds.sidebar_clean = \"\"",
+  "upload": "pending",
+  "permission": "not_verified",
+  "native_loading": "not_verified"
+}

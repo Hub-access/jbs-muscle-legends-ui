@@ -1,0 +1,18 @@
+{
+  "method": "XML/source equality, default-disabled QA, PNG hashes/sizes; not Roblox execution",
+  "generated_modules_match_source": true,
+  "modules_per_entry": 23,
+  "entries_checked": [
+    "JBS_Reference05.rbxmx",
+    "JBS_Reference05.rbxlx"
+  ],
+  "qa_source_matches_and_disabled": [
+    "NativeAvatarQA",
+    "NativeDualAvatarQA"
+  ],
+  "qa_floor_and_spawn_place_only": true,
+  "asset_count": 8,
+  "asset_hashes_and_dimensions_match": true,
+  "avatar_runtime_ids": "empty / pending upload",
+  "native_render": "not_verified"
+}

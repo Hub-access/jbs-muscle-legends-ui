@@ -1,0 +1,9 @@
+{
+  "kind": "generated edit, not recovered original layers",
+  "source": "../../../JBS_DynamicPreview/public/stage2/hero_clan_title_v4.png",
+  "output": "../hero_clean.png",
+  "intent": "Remove all baked character pixels and SIGMA; preserve JBS metallic logo, existing quotation and The Best Clan In Muscle Legend.",
+  "foreground": "Runtime crops the left 53 percent of the same clean PNG without regenerating logo. No alpha cutout claimed.",
+  "native_upload": "pending",
+  "native_visual_verification": "pending"
+}

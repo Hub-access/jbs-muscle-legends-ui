@@ -1,0 +1,15 @@
+{
+  "compiled_files": 28,
+  "offline_luau_status": "passed",
+  "native_render": "not_verified",
+  "native_performance": "not_measured",
+  "resource_uploads": "pending",
+  "business_integration": "not_present_in_current_project",
+  "avatar_offline_status": "passed",
+  "dual_avatar_offline_status": "passed",
+  "avatar_native_status": "not_verified",
+  "avatar_real_accounts_tested": 0,
+  "avatar_test_looks": "offline fixtures only; Studio fixtures pending",
+  "avatar_clean_background": "front and back local PNGs complete; upload, permission and native verification pending",
+  "avatar_scope": "shared appearance; independent front and back displays"
+}

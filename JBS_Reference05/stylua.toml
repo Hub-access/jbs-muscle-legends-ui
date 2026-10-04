@@ -1,0 +1,6 @@
+# 中文注释保留；每行尽量不超过 110 字符，使用 4 空格缩进。
+syntax = "Luau"
+column_width = 110
+indent_type = "Spaces"
+indent_width = 4
+collapse_simple_statement = "Never"

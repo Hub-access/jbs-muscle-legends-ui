@@ -1,0 +1,59 @@
+{
+  "repository": "https://github.com/Hub-access/jbs-muscle-legends-ui",
+  "visibility": "public",
+  "scope": "Current standalone project only; no prior project versions, archives, account screenshots or source backups",
+  "checked_at_utc": "2026-10-04T23:39:39.124235+00:00",
+  "native_compile_files": 28,
+  "offline_assertions": {
+    "ui": 364,
+    "front_avatar": 210,
+    "dual_avatar": 187
+  },
+  "source_model_bundle_equality": "passed",
+  "browser_build": "passed",
+  "browser_route_tests": {
+    "passed": 4,
+    "failed": 0
+  },
+  "roblox_native_runtime": "not_verified",
+  "roblox_resource_uploads": "pending",
+  "real_game_business_integration": "pending",
+  "sensitive_pattern_scan": {
+    "matches": 0,
+    "scope": [
+      "github-token",
+      "openai-key",
+      "private-key",
+      "aws-key",
+      "roblox-cookie",
+      "personal-path"
+    ]
+  },
+  "publication_changes": "Documentation, removal of historical material, portable source-provenance path and regenerated outputs only",
+  "unchanged_native_modules_sha256": {
+    "JBS_Reference05/src/AssetData.lua": "fe488a60f5aeaa1eec8a9f2fd010186f795f64144e6305f3111e68bb3790b22e",
+    "JBS_Reference05/src/Assets.lua": "8c4c8e8db493a1032ed4fe98cb1a3f986f598435ba1b0a241d7a5a19d5ceb6c4",
+    "JBS_Reference05/src/AvatarAccountRequest.lua": "b08e3d8ddbd3b867eed143d046dd486476d944f7b8d83db152bd65d214682d41",
+    "JBS_Reference05/src/AvatarDisplay.lua": "25510b43928f87cfa0444c87e5bba2ab23a358f665fe195a2b971a06474b45aa",
+    "JBS_Reference05/src/AvatarFit.lua": "fa8ef7abebd3978fa09c26e492f4f66adec75d5c9840170b637d9757388f8eca",
+    "JBS_Reference05/src/AvatarHeroView.lua": "28755450659cce9c29824d2247e94643e9de177798ef188311bcb619973adb3f",
+    "JBS_Reference05/src/AvatarRefresh.lua": "d1ce0ddcc50f7766598a02c928d93874e610d0ff9f8e4891fc88a3b4de0a862f",
+    "JBS_Reference05/src/AvatarSidebarView.lua": "dac12dc05026f72864cc79c1027aab79fbd666dcd26cc692a6e193814c91402d",
+    "JBS_Reference05/src/AvatarSnapshot.lua": "9f4d7b74457ab155161b695b85857c57afda647f02084685f7b38ea4cbfd91e6",
+    "JBS_Reference05/src/Bootstrap.client.lua": "1d909be653070b9fc4475db6befb8d8aa371ab018ef9b47f97eacc8b650e30a4",
+    "JBS_Reference05/src/BusinessAdapter.lua": "eb7c82b034f6136bf79994c49a60c3339fc288f231dc23c086e4c4a242cba0c1",
+    "JBS_Reference05/src/BusinessBindings.lua": "499cf0a061fb257222316f8e5c7948bf8fac1a162ce4bf4a2bdfb967085bc46c",
+    "JBS_Reference05/src/Cleanup.lua": "ff0d05bd05e95e8eeb5d0f1d204abe8b98cb0318f7f79336491e3382cc7a4dd1",
+    "JBS_Reference05/src/Components.lua": "8de8c42fcae794cdf13c159c2edc49d4ec0afe6992b2d1add9d92f5337ecb58a",
+    "JBS_Reference05/src/Config.lua": "c62d961c739f7a43df1e9558b2d4cb2a88b604c94f3ba7daad01c1e2d80c6b27",
+    "JBS_Reference05/src/Controller.lua": "c689b1982150bef78252aee96c97dd2f59e5b645b4a91d7eb61a757e22364c35",
+    "JBS_Reference05/src/HeroAvatar.lua": "7b2c1cce85eb90f7f2c5c758f86a04abdc5ac5ac62b165ce9e0ea4fb53f88af0",
+    "JBS_Reference05/src/Layout.lua": "bc82d8ffa2b8ffcb1ea551849e9cb703df3661a6405492e936692fe3f0215acd",
+    "JBS_Reference05/src/LegacyPages.lua": "b2c2249ab10f06ecd8ace13eba00d8e0013054ec24d266d5eb48385c6d17cbd0",
+    "JBS_Reference05/src/Motion.lua": "7a29f22851b9fbf406dfade32152c2b036523bde76e84d8236007e40e7d2f4d8",
+    "JBS_Reference05/src/Runtime.lua": "7fb4bd07a9e9e40a44a66ca9b1e8295eb45d97ded5cfe0e36e825d28884ff182",
+    "JBS_Reference05/src/Theme.lua": "c423ef2472885298cb586056b248599ea793370f5384604e98af2c518262d417",
+    "JBS_Reference05/src/View.lua": "29027db11203ef68d968632bd778951577384528c9b9147d38ae2c926e0d018b"
+  },
+  "checksums": "SHA256SUMS covers every repository payload except itself"
+}

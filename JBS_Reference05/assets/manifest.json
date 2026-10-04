@@ -1,0 +1,284 @@
+{
+  "reference_size": [
+    1672,
+    941
+  ],
+  "layered_original_available": false,
+  "assets": {
+    "logo_jbs": {
+      "file": "assets/logo_jbs.png",
+      "size": [
+        237,
+        150
+      ],
+      "source_rect": [
+        10,
+        8,
+        247,
+        158
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "scale": "Fit",
+      "sha256": "0918c776e116c248e9930b0ef20e690e1b9e9d7c628766e8104e2360d26fe3c0"
+    },
+    "hero_banner": {
+      "file": "assets/hero_banner.png",
+      "size": [
+        2119,
+        742
+      ],
+      "source_rect": [
+        252,
+        55,
+        1337,
+        435
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "scale": "Fit",
+      "sha256": "0b14a483e8ced242b91249aa1cdb7fa3988fea1ef8e02bd14b5af007078c7f58",
+      "copy": "The Best Clan In Muscle Legend",
+      "source_note": "Original reference crop, then localized English subheading edit; source_rect retained as provenance, not a runtime crop."
+    },
+    "sidebar_art": {
+      "file": "assets/sidebar_art.png",
+      "size": [
+        248,
+        245
+      ],
+      "source_rect": [
+        0,
+        629,
+        248,
+        874
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "scale": "Fit",
+      "sha256": "10214f7f6f59019dce81260fbe1ceb9c11a5b7742ace0db184c8d58731f3f820"
+    },
+    "control_art": {
+      "file": "assets/control_art.png",
+      "size": [
+        269,
+        154
+      ],
+      "source_rect": [
+        1061,
+        738,
+        1330,
+        892
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "scale": "Fit",
+      "sha256": "dcec252d2914b776d7e6397f47a4d288074b72004a612fd47c59972f39774f10"
+    },
+    "frame_atlas": {
+      "file": "assets/frame_atlas.png",
+      "size": [
+        1024,
+        512
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "patches": {
+        "panel": {
+          "rect": [
+            0,
+            0,
+            326,
+            342
+          ],
+          "border": 24,
+          "mode": "eight_fixed_corner_and_stretched_edge_patches",
+          "center": "transparent"
+        },
+        "card": {
+          "rect": [
+            352,
+            0,
+            350,
+            112
+          ],
+          "border": 13,
+          "mode": "eight_fixed_corner_and_stretched_edge_patches",
+          "center": "transparent"
+        },
+        "primary": {
+          "rect": [
+            352,
+            128,
+            372,
+            95
+          ],
+          "border": 13,
+          "mode": "eight_fixed_corner_and_stretched_edge_patches",
+          "center": "transparent"
+        }
+      },
+      "decor": {
+        "top_slogan": [
+          352,
+          256,
+          245,
+          60
+        ]
+      },
+      "sha256": "cc9155b2a0ce5a93c15b17cc5c9f2af12c9720a23eeee97abc06a5ba68b7eecb"
+    },
+    "icon_atlas": {
+      "file": "assets/icon_atlas.png",
+      "size": [
+        512,
+        640
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "rects": {
+        "home": [
+          38,
+          41,
+          52,
+          46
+        ],
+        "teleport": [
+          166,
+          41,
+          51,
+          45
+        ],
+        "pet": [
+          292,
+          40,
+          56,
+          47
+        ],
+        "boss": [
+          420,
+          38,
+          55,
+          51
+        ],
+        "rebirth": [
+          36,
+          166,
+          55,
+          51
+        ],
+        "settings": [
+          165,
+          167,
+          54,
+          50
+        ],
+        "train": [
+          283,
+          154,
+          74,
+          75
+        ],
+        "spin": [
+          411,
+          153,
+          74,
+          78
+        ],
+        "pin": [
+          26,
+          282,
+          75,
+          75
+        ],
+        "game": [
+          165,
+          291,
+          54,
+          58
+        ],
+        "version": [
+          294,
+          294,
+          52,
+          52
+        ],
+        "crown": [
+          421,
+          296,
+          53,
+          47
+        ],
+        "gem": [
+          37,
+          427,
+          53,
+          42
+        ],
+        "bolt": [
+          175,
+          426,
+          34,
+          43
+        ],
+        "status": [
+          296,
+          425,
+          48,
+          46
+        ],
+        "strength": [
+          429,
+          429,
+          38,
+          38
+        ],
+        "play": [
+          33,
+          545,
+          62,
+          62
+        ],
+        "stop": [
+          158,
+          542,
+          68,
+          68
+        ],
+        "arrow": [
+          310,
+          563,
+          20,
+          26
+        ]
+      },
+      "note": "Original reference crops with pale-ink alpha extraction; no upsampling. Extraction is editable in prepare_assets.py.",
+      "sha256": "35587e20b267a8bdae88553fecf73382068a8d1f36b3893e4cbf19e33a347f2d"
+    },
+    "hero_clean": {
+      "file": "assets/hero_clean.png",
+      "size": [
+        2116,
+        743
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "scale": "Fit",
+      "sha256": "c9f2b117fbb8ef7d67a6e3273d3723ded4e89f614d3ff4ab2d4f77ac09ea3c26",
+      "copy": "The Best Clan In Muscle Legend",
+      "source_note": "Imagegen removed baked character and SIGMA from title-case v4. Same PNG reused for background and left 53% brand foreground; no separately regenerated logo. Native resource ID pending."
+    },
+    "sidebar_clean": {
+      "file": "assets/sidebar_clean.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "runtime_id": "",
+      "status": "pending_upload_and_native_verification",
+      "scale": "Fit",
+      "sha256": "a629be61435380bf49f422fc9c0ab0bf62b270ef569729911a853f2ff11698f0",
+      "source_note": "Generated removal of baked black-haired character from assets/sidebar_art.png; retained MORE POWER / MORE POSSIBILITIES. Same image lower 37.5% reused as foreground, no alpha required."
+    }
+  }
+}

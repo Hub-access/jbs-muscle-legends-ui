@@ -1,0 +1,3 @@
+Offline avatar engine double, NOT a Roblox native test.
+PASS	210	avatar assertions; 30 hide/restore cycles; source/respawn/late accessory/races/failure/cleanup
+OFFLINE ENGINE DOUBLE ONLY. No native screenshots, layered-clothing fidelity, FPS or real-account verification.

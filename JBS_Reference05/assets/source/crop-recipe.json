@@ -1,0 +1,180 @@
+{
+  "source": "../../reference/JBS_reference_05.png",
+  "art": {
+    "logo_jbs": [
+      10,
+      8,
+      247,
+      158
+    ],
+    "hero_banner": [
+      252,
+      55,
+      1337,
+      435
+    ],
+    "sidebar_art": [
+      0,
+      629,
+      248,
+      874
+    ],
+    "control_art": [
+      1061,
+      738,
+      1330,
+      892
+    ]
+  },
+  "icons": {
+    "home": [
+      27,
+      186,
+      79,
+      232
+    ],
+    "teleport": [
+      27,
+      264,
+      78,
+      309
+    ],
+    "pet": [
+      26,
+      336,
+      82,
+      383
+    ],
+    "boss": [
+      26,
+      419,
+      81,
+      470
+    ],
+    "rebirth": [
+      26,
+      499,
+      81,
+      550
+    ],
+    "settings": [
+      27,
+      574,
+      81,
+      624
+    ],
+    "train": [
+      638,
+      507,
+      712,
+      582
+    ],
+    "spin": [
+      1003,
+      506,
+      1077,
+      584
+    ],
+    "pin": [
+      282,
+      619,
+      357,
+      694
+    ],
+    "game": [
+      1371,
+      158,
+      1425,
+      216
+    ],
+    "version": [
+      1370,
+      336,
+      1422,
+      388
+    ],
+    "crown": [
+      1371,
+      750,
+      1424,
+      797
+    ],
+    "gem": [
+      1370,
+      816,
+      1423,
+      858
+    ],
+    "bolt": [
+      277,
+      737,
+      311,
+      780
+    ],
+    "status": [
+      1362,
+      88,
+      1410,
+      134
+    ],
+    "strength": [
+      270,
+      447,
+      308,
+      485
+    ],
+    "play": [
+      367,
+      797,
+      429,
+      859
+    ],
+    "stop": [
+      763,
+      796,
+      831,
+      864
+    ],
+    "arrow": [
+      566,
+      645,
+      586,
+      671
+    ]
+  },
+  "frames": {
+    "panel": {
+      "rect": [
+        0,
+        0,
+        326,
+        342
+      ],
+      "border": 24,
+      "mode": "eight_fixed_corner_and_stretched_edge_patches",
+      "center": "transparent"
+    },
+    "card": {
+      "rect": [
+        352,
+        0,
+        350,
+        112
+      ],
+      "border": 13,
+      "mode": "eight_fixed_corner_and_stretched_edge_patches",
+      "center": "transparent"
+    },
+    "primary": {
+      "rect": [
+        352,
+        128,
+        372,
+        95
+      ],
+      "border": 13,
+      "mode": "eight_fixed_corner_and_stretched_edge_patches",
+      "center": "transparent"
+    }
+  }
+}

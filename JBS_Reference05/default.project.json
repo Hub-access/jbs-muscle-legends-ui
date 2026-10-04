@@ -1,0 +1,7 @@
+{
+  "name": "JBS Reference 05",
+  "tree": {
+    "$className": "DataModel",
+    "StarterPlayer": {"StarterPlayerScripts": {"JBS_Reference05": {"$path": "src"}}}
+  }
+}

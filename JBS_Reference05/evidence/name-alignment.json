@@ -1,0 +1,12 @@
+{
+  "source_unchanged": true,
+  "source_sha256": "cbbbdb2ace19bf70cb90641a713364a95961ef6ace9af4be78832d060f9793d7",
+  "control_count": 29,
+  "teleport_count": 14,
+  "fallback_pet_count": 49,
+  "teleport_coordinates_equal_original": true,
+  "all_control_types_and_labels_equal_original": true,
+  "browser_catalog_equal_native_source": true,
+  "native_runtime_verified": false,
+  "business_code_imported_or_executed": false
+}

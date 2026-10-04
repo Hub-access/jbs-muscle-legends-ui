@@ -1,0 +1,78 @@
+{
+  "generated_at_utc": "2026-10-04T23:17:15.711929+00:00",
+  "stage": 2,
+  "conclusion": "第二阶段代码及离线检查完成，原生和资源接入仍待验证",
+  "method": "Luau compiler + real Luau CLI executing project API test doubles; not Roblox",
+  "compiled_files": 28,
+  "offline": {
+    "ui": {
+      "status": "passed",
+      "assertions": 364,
+      "log": "evidence/offline-tests.txt"
+    },
+    "front": {
+      "status": "passed",
+      "assertions": 210,
+      "log": "evidence/offline-avatar-tests.txt"
+    },
+    "dual": {
+      "status": "passed",
+      "assertions": 187,
+      "log": "evidence/offline-dual-avatar-tests.txt"
+    }
+  },
+  "dual_scenarios": [
+    "independent models, one normalized source, actual reverse camera",
+    "one source read per update, clothing/body changes applied to both",
+    "late accessory and independent resize",
+    "back preparation failure retains complete old pair",
+    "second camera assignment failure rolls back first attach",
+    "stale prepared revision cannot overwrite newer appearance",
+    "hide in the short submit path cleans old and candidate pairs",
+    "hidden view resumes latest version, shared visible back keeps updating",
+    "account fallback loading, respawn and stale response",
+    "30 full hide/restore cycles and bounded ownership",
+    "destroy in submit path and late engine response",
+    "full UI integration, no business starts, clipped front suspension"
+  ],
+  "front_regression": "offline passed; native pending",
+  "back_implementation": "native Luau code and offline scenarios complete; render pending",
+  "asset_integration": {
+    "local_art": "complete",
+    "mapping": "Config.AssetIds.hero_clean / sidebar_clean",
+    "uploaded": false,
+    "publishing_permission": "not_confirmed",
+    "native_loading": "not_verified"
+  },
+  "native": {
+    "status": "not_run",
+    "reason": "No available Roblox Studio/test session on this host",
+    "real_accounts_tested": 0,
+    "screenshots": [],
+    "performance": "not_measured",
+    "qa_entry": "tests/NativeDualAvatarQA.client.lua",
+    "default_disabled": true
+  },
+  "browser": "unchanged and not used as native evidence",
+  "business": "UI adapter regression passed with test bindings; real target-game business not connected in this package",
+  "package_checks": {
+    "method": "XML/source equality, default-disabled QA, PNG hashes/sizes; not Roblox execution",
+    "generated_modules_match_source": true,
+    "modules_per_entry": 23,
+    "entries_checked": [
+      "JBS_Reference05.rbxmx",
+      "JBS_Reference05.rbxlx"
+    ],
+    "qa_source_matches_and_disabled": [
+      "NativeAvatarQA",
+      "NativeDualAvatarQA"
+    ],
+    "qa_floor_and_spawn_place_only": true,
+    "asset_count": 8,
+    "asset_hashes_and_dimensions_match": true,
+    "avatar_runtime_ids": "empty / pending upload",
+    "native_render": "not_verified"
+  },
+  "next_stage": "not_started; awaiting user confirmation",
+  "distribution": "Public current-version-only package; historical source and baseline logs not included"
+}

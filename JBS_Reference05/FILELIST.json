@@ -1,0 +1,367 @@
+[
+  {
+    "path": "JBS_Reference05.client.lua",
+    "bytes": 176852,
+    "sha256": "38e1e2164d11bfd61754457f7fdb5a5e8ddc24555b678b8a4feaeb8479309d94"
+  },
+  {
+    "path": "JBS_Reference05.rbxlx",
+    "bytes": 210680,
+    "sha256": "e875334d93b61a06afbefdaa8c2aed2fd6bcfd6a4dc4dab64576145e23bc3475"
+  },
+  {
+    "path": "JBS_Reference05.rbxmx",
+    "bytes": 180881,
+    "sha256": "9cf949871eedc6cfbab9e96b865e79f1d12b48866b14f1072ac5a3a3bb1f1ff5"
+  },
+  {
+    "path": "README.md",
+    "bytes": 11053,
+    "sha256": "44759a1a1f314d67a001c8fb9bdba3e9ed8ada8e2933fd893d1a318c2bc0baa6"
+  },
+  {
+    "path": "assets/control_art.png",
+    "bytes": 98672,
+    "sha256": "dcec252d2914b776d7e6397f47a4d288074b72004a612fd47c59972f39774f10"
+  },
+  {
+    "path": "assets/frame_atlas.png",
+    "bytes": 102383,
+    "sha256": "cc9155b2a0ce5a93c15b17cc5c9f2af12c9720a23eeee97abc06a5ba68b7eecb"
+  },
+  {
+    "path": "assets/hero_banner.png",
+    "bytes": 2379373,
+    "sha256": "0b14a483e8ced242b91249aa1cdb7fa3988fea1ef8e02bd14b5af007078c7f58"
+  },
+  {
+    "path": "assets/hero_clean.png",
+    "bytes": 2661499,
+    "sha256": "c9f2b117fbb8ef7d67a6e3273d3723ded4e89f614d3ff4ab2d4f77ac09ea3c26"
+  },
+  {
+    "path": "assets/icon_atlas.png",
+    "bytes": 17449,
+    "sha256": "35587e20b267a8bdae88553fecf73382068a8d1f36b3893e4cbf19e33a347f2d"
+  },
+  {
+    "path": "assets/logo_jbs.png",
+    "bytes": 69111,
+    "sha256": "0918c776e116c248e9930b0ef20e690e1b9e9d7c628766e8104e2360d26fe3c0"
+  },
+  {
+    "path": "assets/manifest.json",
+    "bytes": 6196,
+    "sha256": "e7a02202cad2faed0e7946371a6b7bc085e44823c6bec198033c41ce7cf4c7a3"
+  },
+  {
+    "path": "assets/sidebar_art.png",
+    "bytes": 125703,
+    "sha256": "10214f7f6f59019dce81260fbe1ceb9c11a5b7742ace0db184c8d58731f3f820"
+  },
+  {
+    "path": "assets/sidebar_clean.png",
+    "bytes": 1855440,
+    "sha256": "a629be61435380bf49f422fc9c0ab0bf62b270ef569729911a853f2ff11698f0"
+  },
+  {
+    "path": "assets/source/crop-recipe.json",
+    "bytes": 2245,
+    "sha256": "753af7a40935bf66f1ba027e477a3b4d7a80b51ef98ad2174cc4f28e1c453cec"
+  },
+  {
+    "path": "assets/source/hero_clean_provenance.json",
+    "bytes": 518,
+    "sha256": "69646b8a05f9bf061606fb3cb26d1a4dae49d9328a3354a6ab23b44f4b986eb4"
+  },
+  {
+    "path": "assets/source/sidebar_clean_provenance.json",
+    "bytes": 726,
+    "sha256": "7a39e2711135535eaefa43e25b91876a54f5c3c302e814d6e1230ce4e3398ff3"
+  },
+  {
+    "path": "assets/第二阶段资源清单.json",
+    "bytes": 8103,
+    "sha256": "3a42f2c75414f0d3d1a53b93edca7594a3378226712b7e24e78bdd6f4de30843"
+  },
+  {
+    "path": "catalog/PreviousUI.json",
+    "bytes": 10353,
+    "sha256": "fe7d036a33497a90544b3ad57ed779a41a6b3ba200c381ecbcfc53adb6a8ddb3"
+  },
+  {
+    "path": "default.project.json",
+    "bytes": 166,
+    "sha256": "73138fb5c086b171310bca6e942d20e97e590d872ded14ce3d842230ef8ce6ab"
+  },
+  {
+    "path": "design-qa.md",
+    "bytes": 1341,
+    "sha256": "63575d54d8aad430bc95305ae98295069d75a6b02fecbd6627920a42790404bc"
+  },
+  {
+    "path": "evidence/name-alignment.json",
+    "bytes": 425,
+    "sha256": "860489cfff8d1d96fd44235befec3f378ee7debe1a5b85d3f730088a8c954037"
+  },
+  {
+    "path": "evidence/offline-avatar-tests.txt",
+    "bytes": 272,
+    "sha256": "1ea5817da478b079026bba4abf7ca8f4aae9a0c435ae86d8af17d8e9024a786e"
+  },
+  {
+    "path": "evidence/offline-dual-avatar-tests.txt",
+    "bytes": 1026,
+    "sha256": "ffc090ebf0dbd4d909603264f22dc52d2d47be59db44736aef85ebf696e6ac2e"
+  },
+  {
+    "path": "evidence/offline-tests.txt",
+    "bytes": 376,
+    "sha256": "425b6425fd9c54a9bbd20d51daac247f813828af8e4f0c1ebc39cacab74626b2"
+  },
+  {
+    "path": "evidence/stage2-package-checks.json",
+    "bytes": 534,
+    "sha256": "4296ee1c5a5b1ed64bade322b59a1a2fb03533f3e014c6ae75a846e0f1be6e29"
+  },
+  {
+    "path": "evidence/stage2-report.json",
+    "bytes": 3055,
+    "sha256": "907e7f7528325cf539884a7c04cac3c3b3c763cfa13c01d48f8b5824511468fd"
+  },
+  {
+    "path": "evidence/verification.json",
+    "bytes": 655,
+    "sha256": "91a2d7ea051a5b5feb6ee76c010d363ee8ca4a07984f323979a338d5d3318bfa"
+  },
+  {
+    "path": "reference/JBS_reference_05.png",
+    "bytes": 2444296,
+    "sha256": "dc3eb344bc61d9c50d3acfcd7331d4e8455f262edd34c9dca6bbb237de301345"
+  },
+  {
+    "path": "src/AssetData.lua",
+    "bytes": 7688,
+    "sha256": "fe488a60f5aeaa1eec8a9f2fd010186f795f64144e6305f3111e68bb3790b22e"
+  },
+  {
+    "path": "src/Assets.lua",
+    "bytes": 2942,
+    "sha256": "8c4c8e8db493a1032ed4fe98cb1a3f986f598435ba1b0a241d7a5a19d5ceb6c4"
+  },
+  {
+    "path": "src/AvatarAccountRequest.lua",
+    "bytes": 2219,
+    "sha256": "b08e3d8ddbd3b867eed143d046dd486476d944f7b8d83db152bd65d214682d41"
+  },
+  {
+    "path": "src/AvatarDisplay.lua",
+    "bytes": 3877,
+    "sha256": "25510b43928f87cfa0444c87e5bba2ab23a358f665fe195a2b971a06474b45aa"
+  },
+  {
+    "path": "src/AvatarFit.lua",
+    "bytes": 1445,
+    "sha256": "fa8ef7abebd3978fa09c26e492f4f66adec75d5c9840170b637d9757388f8eca"
+  },
+  {
+    "path": "src/AvatarHeroView.lua",
+    "bytes": 5775,
+    "sha256": "28755450659cce9c29824d2247e94643e9de177798ef188311bcb619973adb3f"
+  },
+  {
+    "path": "src/AvatarRefresh.lua",
+    "bytes": 314,
+    "sha256": "d1ce0ddcc50f7766598a02c928d93874e610d0ff9f8e4891fc88a3b4de0a862f"
+  },
+  {
+    "path": "src/AvatarSidebarView.lua",
+    "bytes": 3483,
+    "sha256": "dac12dc05026f72864cc79c1027aab79fbd666dcd26cc692a6e193814c91402d"
+  },
+  {
+    "path": "src/AvatarSnapshot.lua",
+    "bytes": 11228,
+    "sha256": "9f4d7b74457ab155161b695b85857c57afda647f02084685f7b38ea4cbfd91e6"
+  },
+  {
+    "path": "src/Bootstrap.client.lua",
+    "bytes": 536,
+    "sha256": "1d909be653070b9fc4475db6befb8d8aa371ab018ef9b47f97eacc8b650e30a4"
+  },
+  {
+    "path": "src/BusinessAdapter.lua",
+    "bytes": 4979,
+    "sha256": "eb7c82b034f6136bf79994c49a60c3339fc288f231dc23c086e4c4a242cba0c1"
+  },
+  {
+    "path": "src/BusinessBindings.lua",
+    "bytes": 3249,
+    "sha256": "499cf0a061fb257222316f8e5c7948bf8fac1a162ce4bf4a2bdfb967085bc46c"
+  },
+  {
+    "path": "src/Cleanup.lua",
+    "bytes": 1739,
+    "sha256": "ff0d05bd05e95e8eeb5d0f1d204abe8b98cb0318f7f79336491e3382cc7a4dd1"
+  },
+  {
+    "path": "src/Components.lua",
+    "bytes": 13629,
+    "sha256": "8de8c42fcae794cdf13c159c2edc49d4ec0afe6992b2d1add9d92f5337ecb58a"
+  },
+  {
+    "path": "src/Config.lua",
+    "bytes": 1900,
+    "sha256": "c62d961c739f7a43df1e9558b2d4cb2a88b604c94f3ba7daad01c1e2d80c6b27"
+  },
+  {
+    "path": "src/Controller.lua",
+    "bytes": 13345,
+    "sha256": "c689b1982150bef78252aee96c97dd2f59e5b645b4a91d7eb61a757e22364c35"
+  },
+  {
+    "path": "src/HeroAvatar.lua",
+    "bytes": 25145,
+    "sha256": "7b2c1cce85eb90f7f2c5c758f86a04abdc5ac5ac62b165ce9e0ea4fb53f88af0"
+  },
+  {
+    "path": "src/Layout.lua",
+    "bytes": 8820,
+    "sha256": "bc82d8ffa2b8ffcb1ea551849e9cb703df3661a6405492e936692fe3f0215acd"
+  },
+  {
+    "path": "src/LegacyCatalog.lua",
+    "bytes": 14469,
+    "sha256": "d3edb5861ab1274a2f174fd38cce790b1d8a410e7034b1850ff54779f214a265"
+  },
+  {
+    "path": "src/LegacyPages.lua",
+    "bytes": 8101,
+    "sha256": "b2c2249ab10f06ecd8ace13eba00d8e0013054ec24d266d5eb48385c6d17cbd0"
+  },
+  {
+    "path": "src/Motion.lua",
+    "bytes": 2930,
+    "sha256": "7a29f22851b9fbf406dfade32152c2b036523bde76e84d8236007e40e7d2f4d8"
+  },
+  {
+    "path": "src/Runtime.lua",
+    "bytes": 7371,
+    "sha256": "7fb4bd07a9e9e40a44a66ca9b1e8295eb45d97ded5cfe0e36e825d28884ff182"
+  },
+  {
+    "path": "src/Theme.lua",
+    "bytes": 1607,
+    "sha256": "c423ef2472885298cb586056b248599ea793370f5384604e98af2c518262d417"
+  },
+  {
+    "path": "src/View.lua",
+    "bytes": 29364,
+    "sha256": "29027db11203ef68d968632bd778951577384528c9b9147d38ae2c926e0d018b"
+  },
+  {
+    "path": "stylua.toml",
+    "bytes": 194,
+    "sha256": "fd1421ce43a6c0f590fbabe3c6cb0bf77ed73241e8fdb0259265f7a402144ad0"
+  },
+  {
+    "path": "tests/NativeAvatarQA.client.lua",
+    "bytes": 11524,
+    "sha256": "895755199e6c20f34b2ae1cf1dedbf49c1474c468069038382d3b423aaa8fa1d"
+  },
+  {
+    "path": "tests/NativeDualAvatarQA.client.lua",
+    "bytes": 16541,
+    "sha256": "80688b3de16fd307dad1cfccc3ffa0c1002233a9c7a76cdffb39059742b3d2c2"
+  },
+  {
+    "path": "tests/NativeQA.client.lua",
+    "bytes": 2885,
+    "sha256": "9c4bdaf685802517663dfa4a38fde581823d6fa6b4d5763fda1f317dbd88ee5d"
+  },
+  {
+    "path": "tests/avatar-engine.luau",
+    "bytes": 6546,
+    "sha256": "733bb2fcc5eb76e81efdceee23285ebf73d15cde190a5b01c0d16fc42dc70af3"
+  },
+  {
+    "path": "tests/avatar-stress.luau",
+    "bytes": 11617,
+    "sha256": "f83ea853d354c7ccd69484ceec475c336f9a8f7451e241dfa2e4e1184a1d8240"
+  },
+  {
+    "path": "tests/dual-avatar-stress.luau",
+    "bytes": 16466,
+    "sha256": "53fe83bbb275e6afd8a42e47c834f2e15a8c0c6cb42d98012286447c21856ce6"
+  },
+  {
+    "path": "tests/dump-scene.luau",
+    "bytes": 1842,
+    "sha256": "577134bf0847cfaf65261bf95d5da920a706357423c01f5a622d99ddc453c1eb"
+  },
+  {
+    "path": "tests/mock-engine.luau",
+    "bytes": 6714,
+    "sha256": "49f80c3736ebe3319c67cabf3b75f9b2c43fe22749ce82c10d9a5362ded9af49"
+  },
+  {
+    "path": "tests/modules.bundle.luau",
+    "bytes": 177079,
+    "sha256": "de94b3e3e28b46038423f7adcfec06bbe28b18a7f50c23271b1125f4b59625e5"
+  },
+  {
+    "path": "tests/stress.luau",
+    "bytes": 12408,
+    "sha256": "4c8a3113db00a4a2e2b79b00a9caee2753b754d7ba8bc0dafce41f1178d06ce7"
+  },
+  {
+    "path": "tools/build.py",
+    "bytes": 4579,
+    "sha256": "0a9de4484c258590769bd3a1fc039ac62d19dec8e6059c58c79b053a492cc56c"
+  },
+  {
+    "path": "tools/check_stage2_package.py",
+    "bytes": 2461,
+    "sha256": "c63251d1aa6f9646d4f8a1759bdedeaf21e5fa0498ee83fba28b277e0912e9f9"
+  },
+  {
+    "path": "tools/prepare_assets.py",
+    "bytes": 4613,
+    "sha256": "119993e17e652255ca6ad21df9bd4399773eb0f5e8dc90379b102ca00c1c3e2f"
+  },
+  {
+    "path": "tools/render_layout.py",
+    "bytes": 8121,
+    "sha256": "b3ca4a18999018a6526f637c7677458520f6c95d59f35bcea33a48ac80007cbf"
+  },
+  {
+    "path": "tools/sync_catalog.py",
+    "bytes": 2373,
+    "sha256": "fb011597713d32f94d92d57f4d0834fdc06ed18003aea554cde476277bd4161d"
+  },
+  {
+    "path": "tools/test.py",
+    "bytes": 3134,
+    "sha256": "91725b224f232c5901f5e76943cf4b7f3bc29437beef4c8604fbc4fb532a9db1"
+  },
+  {
+    "path": "先读我_代码导览.md",
+    "bytes": 5720,
+    "sha256": "b99df667a7f3d33c532900f66a2540f2a6d7406dc0822e7c512ba5abe8f0542a"
+  },
+  {
+    "path": "旧版控件对照表.md",
+    "bytes": 3056,
+    "sha256": "ecbe40c0bf80de67ef42493eab47a9c46c26861264c9794269bbb2b46e7f38aa"
+  },
+  {
+    "path": "第二阶段_正背面同步_说明.md",
+    "bytes": 11049,
+    "sha256": "a6ca359b650ac944e5ef61a5d4d124c402072102d346732ac0ccb2f3711441be"
+  },
+  {
+    "path": "第二阶段_资源清单.md",
+    "bytes": 4425,
+    "sha256": "4765a0d9a792218048f67b551848f303d3b2ac68abd7a9be03c177ea19e4efcc"
+  }
+]

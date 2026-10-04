@@ -1,0 +1,15 @@
+Stage 2 offline engine double; NOT Roblox native verification.
+PASS	187	dual-view assertions across	12	scenarios; 30 hide/restore cycles
+SCENARIO	independent models, one normalized source, actual reverse camera
+SCENARIO	one source read per update, clothing/body changes applied to both
+SCENARIO	late accessory and independent resize
+SCENARIO	back preparation failure retains complete old pair
+SCENARIO	second camera assignment failure rolls back first attach
+SCENARIO	stale prepared revision cannot overwrite newer appearance
+SCENARIO	hide in the short submit path cleans old and candidate pairs
+SCENARIO	hidden view resumes latest version, shared visible back keeps updating
+SCENARIO	account fallback loading, respawn and stale response
+SCENARIO	30 full hide/restore cycles and bounded ownership
+SCENARIO	destroy in submit path and late engine response
+SCENARIO	full UI integration, no business starts, clipped front suspension
+OFFLINE DOUBLE ONLY: no Roblox render, upload permission, real-account fidelity or FPS measured.

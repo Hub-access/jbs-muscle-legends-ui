@@ -1,0 +1,30 @@
+{
+  "folders": [
+    {
+      "name": "① Roblox 原生 Luau · 中文注释",
+      "path": "JBS_Reference05"
+    },
+    {
+      "name": "② Chrome 动态预览 · 中文注释",
+      "path": "JBS_DynamicPreview"
+    }
+  ],
+  "settings": {
+    "editor.wordWrap": "on",
+    "editor.tabSize": 4,
+    "files.associations": {
+      "*.lua": "lua",
+      "*.luau": "lua"
+    },
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true
+    },
+    "search.exclude": {
+      "**/JBS_Reference05.client.lua": true,
+      "**/modules.bundle.luau": true,
+      "**/*.rbxmx": true,
+      "**/*.rbxlx": true
+    }
+  }
+}
