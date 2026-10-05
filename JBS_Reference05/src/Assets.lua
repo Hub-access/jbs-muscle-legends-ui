@@ -43,6 +43,19 @@ function Assets:Summary()
     end
     return loaded, total
 end
+-- UI 库允许单独删除控件；及时移除该子树的订阅，避免加载结束后访问已销毁图片。
+function Assets:UnbindTree(root)
+    for index = #self.subscribers, 1, -1 do
+        local node = self.subscribers[index].image
+        while node do
+            if node == root then
+                table.remove(self.subscribers, index)
+                break
+            end
+            node = node.Parent
+        end
+    end
+end
 -- 异步预加载；每次等待后核对是否已经销毁，避免更新失效界面。
 function Assets:Load(changed)
     self.thread = task.spawn(function()

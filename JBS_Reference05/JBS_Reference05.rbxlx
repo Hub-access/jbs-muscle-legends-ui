@@ -322,6 +322,19 @@ function Assets:Summary()
     end
     return loaded, total
 end
+-- UI 库允许单独删除控件；及时移除该子树的订阅，避免加载结束后访问已销毁图片。
+function Assets:UnbindTree(root)
+    for index = #self.subscribers, 1, -1 do
+        local node = self.subscribers[index].image
+        while node do
+            if node == root then
+                table.remove(self.subscribers, index)
+                break
+            end
+            node = node.Parent
+        end
+    end
+end
 -- 异步预加载；每次等待后核对是否已经销毁，避免更新失效界面。
 function Assets:Load(changed)
     self.thread = task.spawn(function()
@@ -3754,6 +3767,997 @@ function Pages.Refresh(view)
     end
 end
 return Pages
+</ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX142ac4e13cce52a33b"><Properties><string name="Name">Library</string><ProtectedString name="Source">--[[
+    JBS UI 库公开入口。require 本模块只得到接口，不创建窗口、不启动游戏任务。
+    CreateWindow：用当前 JBS 外观建立你自己的页面和控件。
+    CreateJBS：原样创建当前工程的完整预设，业务仍通过原 Bindings 接入。
+    用法统一使用冒号：Library:CreateWindow({Id="MyUI", Title="我的界面"})。
+]]
+local Library = { Version = "1.0.0" }
+
+function Library:CreateWindow(options)
+    return require(script.Parent.LibraryWindow).new(options or {})
+end
+
+function Library:CreateJBS(options)
+    -- 复用已有入口：保留原有授权、配置、启停、热键和当前玩家正背面展示。
+    return require(script.Parent.Runtime).Mount(options or {})
+end
+
+return Library
+</ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBXfb9c221bb0ecd88930"><Properties><string name="Name">LibraryControls</string><ProtectedString name="Source">--[[
+    UI 库的页面/右栏共用控件。不包含任何游戏 Remote、坐标或自动任务。
+    每个控件有自己的清理箱，删除一个控件不必销毁整个窗口。
+    创建控件和 Set(value) 默认静默；真实交互或 Set(value, true) 才执行 Callback。
+    Callback 返回 false, "原因" 或抛错时回滚值；等待中的回调不会重复进入。
+]]
+local Cleanup = require(script.Parent.Cleanup)
+local Components = require(script.Parent.Components)
+local Theme = require(script.Parent.Theme)
+local C = Theme.Colors
+local TextService = game:GetService("TextService")
+local InputService = game:GetService("UserInputService")
+local Controls = {}
+Controls.__index = Controls
+local Control = {}
+Control.__index = Control
+
+local function finite(value)
+    return type(value) == "number" and value == value and math.abs(value) &lt; math.huge
+end
+local function rect(object, x, y, w, h)
+    object.Position = UDim2.fromOffset(x, y)
+    object.Size = UDim2.fromOffset(math.max(1, w), math.max(1, h))
+end
+local function options(input)
+    if type(input) == "string" then return {Title = input} end
+    assert(input == nil or type(input) == "table", "控件参数必须是 table")
+    return input or {}
+end
+local function measured(text, width, size, bold)
+    if text == "" then return 0 end
+    -- 按可用宽度测量换行，不把长标题自动缩小。最终字形仍以 Roblox 实测为准。
+    local bounds = TextService:GetTextSize(text, size, bold and Theme.Bold or Theme.Font,
+        Vector2.new(math.max(20, width), 100000))
+    return math.max(math.ceil(size * 1.4), math.ceil(bounds.Y * 1.4))
+end
+local function normalizeOptions(values)
+    assert(type(values) == "table", "Dropdown.Options 必须是数组")
+    local result, seen = {}, {}
+    for _, value in ipairs(values) do
+        local id, label
+        if type(value) == "string" then id, label = value, value
+        elseif type(value) == "table" then id, label = value.Id, value.Label or value.Id end
+        assert(type(id) == "string" and id ~= "" and type(label) == "string", "下拉选项使用字符串或 {Id, Label}")
+        assert(not seen[id], "下拉选项 Id 重复：" .. id)
+        seen[id] = true
+        table.insert(result, {Id = id, Label = label})
+    end
+    return result
+end
+
+-- Container 可以是一页内容，也可以是右侧设置区；所有控件使用相同接口。
+function Controls.new(window, parent, columns)
+    return setmetatable({window = window, parent = parent, rows = {}, width = 300,
+        columns = columns or 1, dead = false}, Controls)
+end
+function Controls:IsVisible()
+    return not self.dead and self.window.visible and self.window.Screen.Enabled and self.parent.Visible
+end
+
+function Controls:Relayout(width)
+    if self.dead then return end
+    self.width = math.max(100, width or self.width)
+    local columns = math.min(self.columns, math.max(1, math.floor((self.width + 12) / 312)))
+    local cardWidth = (self.width - (columns - 1) * 12) / columns
+    local y, group, tallest = 0, {}, 0
+    local function flush()
+        if #group == 0 then return end
+        for index, row in ipairs(group) do
+            row:_Layout((index - 1) * (cardWidth + 12), y, cardWidth, tallest)
+        end
+        y += tallest + 12
+        group, tallest = {}, 0
+    end
+    for _, row in ipairs(self.rows) do
+        if not row.dead and row.visible then
+            if row.kind == "Section" or row.kind == "Divider" then
+                flush()
+                local h = row:_Measure(self.width)
+                row:_Layout(0, y, self.width, h)
+                y += h + 12
+            else
+                table.insert(group, row)
+                tallest = math.max(tallest, row:_Measure(cardWidth))
+                if #group == columns then flush() end
+            end
+        end
+    end
+    flush()
+    self.parent.CanvasSize = UDim2.fromOffset(0, math.max(0, y))
+end
+
+function Controls:_Create(kind, input)
+    assert(not self.dead and not self.window.dead, "页面已经销毁")
+    local p = options(input)
+    assert(p.Callback == nil or type(p.Callback) == "function", "Callback 必须是函数")
+    self.window.sequence += 1
+    local id = p.Id or ("control_" .. self.window.sequence)
+    assert(type(id) == "string" and id ~= "" and not self.window.controls[id], "控件 Id 为空或重复")
+    local scope = Cleanup.new()
+    local u = Components.new(scope, self.window.motion, self.window.assets)
+    local row = setmetatable({container = self, window = self.window, scope = scope, u = u,
+        Id = id, kind = kind, title = p.Title or kind, description = p.Description or "",
+        enabled = p.Disabled ~= true, visible = p.Visible ~= false, callback = p.Callback,
+        dead = false, busy = false, value = nil}, Control)
+    assert(type(row.title) == "string" and type(row.description) == "string", "Title / Description 必须是字符串")
+    if kind == "Section" or kind == "Divider" then
+        row.Root = u:Box(self.parent, id, 0, 0, 300, 40)
+    else
+        row.Root = u:Panel(self.parent, id, 0, 0, 300, 100, "card")
+    end
+    row.Root.Visible = row.visible
+    row.TitleLabel = u:Text(row.Root, "Title", row.title, 16, 12, 268, 28, 18, C.White, true)
+    row.DescriptionLabel = u:Text(row.Root, "Description", row.description, 16, 40, 268, 20, 14, C.Muted)
+    for _, label in ipairs({row.TitleLabel, row.DescriptionLabel}) do
+        label.TextWrapped = true
+        label.TextTruncate = Enum.TextTruncate.None
+        label.LineHeight = 1.4
+    end
+    self.window.controls[id] = row
+    table.insert(self.rows, row)
+    return row, p
+end
+
+function Control:Get() return self.value end
+function Control:SetTitle(value)
+    if self.dead then return false end
+    assert(type(value) == "string", "标题必须是字符串")
+    self.title, self.TitleLabel.Text = value, value
+    self.container:Relayout()
+    return true
+end
+function Control:SetDescription(value)
+    if self.dead then return false end
+    assert(type(value) == "string", "说明必须是字符串")
+    self.description, self.DescriptionLabel.Text = value, value
+    self.container:Relayout()
+    return true
+end
+function Control:SetEnabled(value)
+    if self.dead then return false end
+    self.enabled = value == true
+    if not self.enabled then self.drag = nil; self.open = false end
+    self:_Paint()
+    self.container:Relayout()
+    return true
+end
+function Control:SetVisible(value)
+    if self.dead then return false end
+    self.visible, self.Root.Visible = value == true, value == true
+    if not self.visible then self.drag = nil; self.open = false end
+    self.container:Relayout()
+    return true
+end
+
+function Control:_Normalize(value)
+    if self.kind == "Toggle" then
+        assert(type(value) == "boolean", "开关值必须是 boolean")
+    elseif self.kind == "Input" then
+        if self.numeric then
+            value = tonumber(value)
+            assert(finite(value), "请输入有限数值")
+            if self.minimum then value = math.max(self.minimum, value) end
+            if self.maximum then value = math.min(self.maximum, value) end
+            if self.integer then value = math.floor(value) end
+        else
+            assert(type(value) == "string", "输入值必须是字符串")
+        end
+    elseif self.kind == "Slider" then
+        value = tonumber(value)
+        assert(finite(value), "滑块值必须是有限数值")
+        value = math.clamp(value, self.minimum, self.maximum)
+        value = math.clamp(self.minimum + math.floor((value - self.minimum) / self.step + 0.5) * self.step,
+            self.minimum, self.maximum)
+        value = tonumber(string.format("%.10g", value))
+    elseif self.kind == "Dropdown" then
+        if value ~= nil then
+            local found = false
+            for _, item in ipairs(self.values) do if item.Id == value then found = true end end
+            assert(found, "下拉值不在当前 Options 中")
+        end
+    else error("此控件没有可设置的值") end
+    return value
+end
+
+-- UI 回调可以 yield。忙碌期间拒绝重复提交，销毁后不再写入失效控件。
+function Control:Set(value, fireCallback)
+    if self.dead or self.busy then return false, "控件已销毁或回调处理中" end
+    local ok, normalized = pcall(self._Normalize, self, value)
+    if not ok then self.window:Notify({Title = "输入无效", Content = tostring(normalized)}); self:_Paint(); return false end
+    if normalized == self.value then self:_Paint(); return true end
+    local old = self.value
+    self.value = normalized
+    self:_Paint()
+    if fireCallback and self.callback then
+        self.busy = true; self:_Paint()
+        local success, accepted, reason = pcall(self.callback, normalized, self)
+        self.busy = false
+        if self.dead then return false, "控件已销毁" end
+        if not success or accepted == false then
+            self.value = old
+            self.window:Notify({Title = "操作未完成", Content = tostring(success and (reason or "回调拒绝了本次修改") or accepted)})
+            self:_Paint()
+            return false
+        end
+        self:_Paint()
+    end
+    return true
+end
+
+function Control:Press()
+    if self.kind ~= "Button" or self.dead or self.busy or not self.enabled or not self.visible or not self.container:IsVisible() then return false end
+    if not self.callback then return false end
+    self.busy = true; self:_Paint()
+    local ok, accepted, reason = pcall(self.callback, self)
+    self.busy = false
+    if self.dead then return false end
+    self:_Paint()
+    if not ok or accepted == false then
+        self.window:Notify({Title = "操作未完成", Content = tostring(ok and (reason or "回调返回 false") or accepted)})
+        return false
+    end
+    return true
+end
+
+function Control:_Paint()
+    if self.dead then return end
+    local enabled = self.enabled and not self.busy
+    if self.kind == "Button" then enabled = enabled and self.callback ~= nil end
+    self.TitleLabel.TextColor3 = self.enabled and C.White or C.Muted
+    if self.toggle then
+        self.toggle.Set(self.value == true, enabled)
+        -- 通用库的禁用代表调用者禁用，不把它错误解释成游戏“未接入”。
+        self.toggle.root.Value.Text = self.busy and "处理中" or (not self.enabled and "禁用" or (self.value and "开启" or "关闭"))
+    end
+    if self.action then
+        self.action.button.Active, self.action.button.Selectable = enabled, enabled
+        if self.kind == "Button" then self.action.label.Text = self.busy and "处理中…" or self.buttonText end
+    end
+    if self.input then
+        self.input.TextEditable = enabled
+        self.input.Text = self.value == nil and "" or tostring(self.value)
+    end
+    if self.kind == "Dropdown" then
+        local caption = #self.values == 0 and "暂无选项" or self.placeholder
+        for _, item in ipairs(self.values) do if item.Id == self.value then caption = item.Label end end
+        self.action.label.Text = caption
+        self.action.button.Active = enabled and #self.values &gt; 0
+        self.action.button.Selectable = self.action.button.Active
+        if not enabled then self.open = false end
+        self.list.Visible = self.open == true
+        for _, item in ipairs(self.optionRows or {}) do item.hit.Active = enabled; item.hit.Selectable = enabled end
+    elseif self.kind == "Slider" then
+        local value = self.drag and self.drag.value or self.value
+        local ratio = (value - self.minimum) / (self.maximum - self.minimum)
+        self.fill.Size = UDim2.fromScale(ratio, 1)
+        self.knob.Position = UDim2.new(ratio, -7, 0.5, -7)
+        self.hit.Active, self.hit.Selectable = enabled, enabled
+        self.input.Text = tostring(value)
+    end
+end
+
+function Control:_Measure(width)
+    if self.kind == "Divider" then return 8 end
+    local textWidth = math.max(20, width - 32 - (self.kind == "Toggle" and 80 or 0))
+    self.titleHeight = measured(self.title, textWidth, 18, true)
+    self.descriptionHeight = measured(self.description, textWidth, 14, false)
+    self.contentY = 12 + self.titleHeight + (self.descriptionHeight &gt; 0 and 5 + self.descriptionHeight or 0)
+    if self.kind == "Section" then return math.max(40, self.contentY + 8) end
+    if self.kind == "Toggle" then return math.max(84, self.contentY + 14) end
+    if self.kind == "Label" then return self.contentY + 14 end
+    local h = self.contentY + 10 + 44 + 14
+    if self.kind == "Dropdown" and self.open then
+        self.optionsHeight = 0
+        for _, item in ipairs(self.optionRows) do
+            self.optionsHeight += math.max(42, measured(item.label.Text, width - 64, 16, false) + 16)
+        end
+        h += math.min(216, self.optionsHeight) + 8
+    end
+    return h
+end
+
+function Control:_Layout(x, y, width, height)
+    rect(self.Root, x, y, width, height)
+    if self.kind == "Divider" then rect(self.line, 0, 3, width, 1); return end
+    if self.kind ~= "Section" then self.u:ResizePanel(self.Root, width, height) end
+    local textWidth = width - 32 - (self.kind == "Toggle" and 80 or 0)
+    rect(self.TitleLabel, 16, 12, textWidth, self.titleHeight)
+    rect(self.DescriptionLabel, 16, 17 + self.titleHeight, textWidth, self.descriptionHeight)
+    self.DescriptionLabel.Visible = self.descriptionHeight &gt; 0
+    local actionY = self.contentY + 10
+    if self.toggle then rect(self.toggle.root, width - 80, (height - 48) / 2, 64, 48) end
+    if self.action then
+        rect(self.action.root, 16, actionY, width - 32, 44)
+        self.u:ResizePanel(self.action.root, width - 32, 44)
+        rect(self.action.button, 0, 0, width - 32, 44)
+        rect(self.action.label, 12, 0, width - 56, 44)
+        self.action.label.TextSize = 16
+    end
+    if self.input then
+        if self.kind == "Slider" then rect(self.input, width - 106, actionY, 90, 40)
+        else rect(self.input, 16, actionY, width - 32, 40) end
+    end
+    if self.kind == "Slider" then
+        rect(self.track, 20, actionY + 17, width - 142, 6)
+        rect(self.hit, 12, actionY, width - 126, 40)
+    elseif self.kind == "Dropdown" then
+        local optionY = 0
+        for _, item in ipairs(self.optionRows) do
+            local rowHeight = math.max(42, measured(item.label.Text, width - 64, 16, false) + 16)
+            rect(item.label, 12, optionY, width - 64, rowHeight)
+            rect(item.hit, 0, optionY, width - 40, rowHeight)
+            optionY += rowHeight
+        end
+        self.optionsHeight = optionY
+        rect(self.list, 16, actionY + 52, width - 32, math.min(216, optionY))
+        self.list.CanvasSize = UDim2.fromOffset(0, optionY)
+    end
+end
+
+function Control:Destroy()
+    if self.dead then return end
+    self.dead = true; self.drag = nil
+    if self.optionScope then self.optionScope:Destroy() end
+    self.scope:Destroy()
+    -- Cancel 只取消本控件上的现有动画，不干涉其他控件或游戏脚本。
+    for _, object in ipairs(self.Root:GetDescendants()) do self.window.motion:Cancel(object) end
+    self.window.motion:Cancel(self.Root)
+    self.window.assets:UnbindTree(self.Root)
+    self.Root:Destroy()
+    self.window.controls[self.Id] = nil
+    local index = table.find(self.container.rows, self)
+    if index then table.remove(self.container.rows, index) end
+    self.container:Relayout()
+end
+
+function Controls:Toggle(input)
+    local p = options(input)
+    assert(p.Default == nil or type(p.Default) == "boolean", "Toggle.Default 必须是 boolean")
+    local row = self:_Create("Toggle", p)
+    row.toggle = row.u:Toggle(row.Root, "Toggle", 220, 20, function()
+        if row.enabled and not row.busy and row.visible and row.container:IsVisible() then row:Set(not row.value, true) end
+    end)
+    row.value = p.Default == true
+    row:_Paint(); self:Relayout(); return row
+end
+
+function Controls:Button(input)
+    local p = options(input)
+    assert(p.ButtonText == nil or type(p.ButtonText) == "string", "ButtonText 必须是字符串")
+    local row = self:_Create("Button", p)
+    row.buttonText = p.ButtonText or "执行"
+    row.action = row.u:Button(row.Root, "Action", row.buttonText, 16, 60, 268, 44, function() row:Press() end, p.Primary == true)
+    row:_Paint(); self:Relayout(); return row
+end
+
+local function inputBox(row, placeholder)
+    local box = row.u:Make("TextBox", row.Root, "Input", {
+        BackgroundColor3 = C.Black, BorderSizePixel = 0, TextColor3 = C.White,
+        PlaceholderColor3 = C.Muted, PlaceholderText = placeholder or "请输入",
+        Font = Theme.Font, TextSize = 16, ClearTextOnFocus = false, MultiLine = false,
+        TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6,
+    })
+    row.u:Make("UIPadding", box, "Padding", {PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+    row.u:Make("UIStroke", box, "Border", {Color = C.Border, Thickness = 1})
+    row.scope:Connect(box.FocusLost, function()
+        if row.enabled and not row.busy and row.visible and row.container:IsVisible() then row:Set(box.Text, true) else row:_Paint() end
+    end)
+    return box
+end
+function Controls:Input(input)
+    local p = table.clone(options(input))
+    assert(p.Min == nil or finite(p.Min), "Min 必须为有限数值")
+    assert(p.Max == nil or finite(p.Max), "Max 必须为有限数值")
+    assert(not (p.Min and p.Max) or p.Min &lt;= p.Max, "Min 不能大于 Max")
+    if p.Numeric and p.Integer then
+        if p.Min then p.Min = math.ceil(p.Min) end
+        if p.Max then p.Max = math.floor(p.Max) end
+        assert(not (p.Min and p.Max) or p.Min &lt;= p.Max, "范围中没有可用整数")
+    end
+    if p.Default ~= nil then
+        assert(p.Numeric and finite(tonumber(p.Default)) or (not p.Numeric and type(p.Default) == "string"), "Input.Default 类型不正确")
+    end
+    local row = self:_Create("Input", p)
+    row.numeric, row.integer, row.minimum, row.maximum = p.Numeric == true, p.Integer == true, p.Min, p.Max
+    row.input = inputBox(row, p.Placeholder)
+    row.value = row:_Normalize(p.Default == nil and (row.numeric and 0 or "") or p.Default)
+    row:_Paint(); self:Relayout(); return row
+end
+
+function Control:SetOptions(values, fireCallback)
+    assert(self.kind == "Dropdown", "SetOptions 只用于下拉框")
+    if self.dead or self.busy then return false end
+    local normalized = normalizeOptions(values)
+    local oldValues, oldValue = self.values, self.value
+    self.values = normalized
+    local retained = false
+    for _, item in ipairs(normalized) do if item.Id == self.value then retained = true end end
+    if not retained and not self:Set(nil, fireCallback) then
+        self.values, self.value = oldValues, oldValue
+        self:_Paint(); return false
+    end
+    if self.optionScope then self.optionScope:Destroy() end
+    self.optionScope, self.optionRows = Cleanup.new(), {}
+    for _, child in ipairs(self.list:GetDescendants()) do self.window.motion:Cancel(child) end
+    for _, child in ipairs(self.list:GetChildren()) do child:Destroy() end
+    local u = Components.new(self.optionScope, self.window.motion, self.window.assets)
+    for index, item in ipairs(normalized) do
+        local label = u:Text(self.list, "OptionLabel_" .. index, item.Label, 12, 0, 240, 42, 16, C.White)
+        label.TextWrapped, label.TextTruncate, label.LineHeight = true, Enum.TextTruncate.None, 1.4
+        local hit = u:Interact(self.list, "Option_" .. index, 0, 0, 260, 42, function()
+            if self.dead or not self.enabled or self.busy or not self.visible or not self.open or not self.container:IsVisible() then return end
+            self.open = false; self.list.Visible = false
+            self:Set(item.Id, true)
+            self.container:Relayout()
+        end)
+        table.insert(self.optionRows, {label = label, hit = hit})
+    end
+    self.open = false; self:_Paint(); self.container:Relayout(); return true
+end
+function Controls:Dropdown(input)
+    local p = options(input)
+    local values = normalizeOptions(p.Options or {})
+    if p.Default ~= nil then
+        local found = false
+        for _, item in ipairs(values) do if item.Id == p.Default then found = true end end
+        assert(found, "Dropdown.Default 不在 Options 内")
+    end
+    local row = self:_Create("Dropdown", p)
+    row.values, row.optionRows, row.placeholder = {}, {}, p.Placeholder or "请选择"
+    row.list = row.u:Make("ScrollingFrame", row.Root, "Options", {
+        BackgroundColor3 = C.Black, BorderSizePixel = 0, Visible = false,
+        ScrollBarThickness = 4, ScrollBarImageColor3 = C.Light, ClipsDescendants = true,
+        ScrollingDirection = Enum.ScrollingDirection.Y, CanvasSize = UDim2.fromOffset(0, 0),
+    })
+    row.action = row.u:Button(row.Root, "Selection", "请选择", 16, 60, 268, 44, function()
+        if not row.enabled or row.busy or #row.values == 0 or not row.container:IsVisible() then return end
+        row.open = not row.open; row:_Paint()
+        -- 展开菜单只占自己的卡片，不覆盖下一行；换行后的选项高度也参与测量。
+        row.container:Relayout()
+    end)
+    row:SetOptions(values); row:Set(p.Default); self:Relayout(); return row
+end
+
+function Controls:Slider(input)
+    local p = options(input)
+    local minimum, maximum, step = p.Min or 0, p.Max or 100, p.Step or 1
+    assert(finite(minimum) and finite(maximum) and maximum &gt; minimum, "Slider 需要 Min &lt; Max")
+    assert(finite(step) and step &gt; 0, "Step 必须大于 0")
+    assert(p.Default == nil or finite(tonumber(p.Default)), "Slider.Default 必须是有限数值")
+    local row = self:_Create("Slider", p)
+    row.minimum, row.maximum, row.step = minimum, maximum, step
+    row.value = row:_Normalize(p.Default or minimum)
+    row.input = inputBox(row, "数值")
+    row.track = row.u:Line(row.Root, "Track", 20, 77, 150, 6, C.Dim)
+    row.fill = row.u:Line(row.track, "Fill", 0, 0, 1, 6, C.Pink)
+    row.knob = row.u:Line(row.track, "Knob", 0, 0, 14, 14, C.White)
+    row.u:Make("UICorner", row.knob, "Round", {CornerRadius = UDim.new(1, 0)})
+    row.hit = row.u:Interact(row.Root, "SliderHit", 12, 60, 170, 40, function() end)
+    local function point(event)
+        local width = row.track.AbsoluteSize.X
+        if width &lt;= 0 then return row.value end
+        local ratio = math.clamp((event.Position.X - row.track.AbsolutePosition.X) / width, 0, 1)
+        return row:_Normalize(minimum + ratio * (maximum - minimum))
+    end
+    row.scope:Connect(row.hit.InputBegan, function(event)
+        if not row.enabled or row.busy or not row.visible or not row.container:IsVisible() then return end
+        if event.UserInputType == Enum.UserInputType.MouseButton1 or event.UserInputType == Enum.UserInputType.Touch then
+            row.drag = {input = event, value = point(event)}; row:_Paint()
+        end
+    end)
+    row.scope:Connect(InputService.InputChanged, function(event)
+        if row.drag and not row.container:IsVisible() then row.drag = nil; row:_Paint(); return end
+        if row.drag and (event == row.drag.input or (row.drag.input.UserInputType == Enum.UserInputType.MouseButton1
+            and event.UserInputType == Enum.UserInputType.MouseMovement)) then
+            row.drag.value = point(event); row:_Paint()
+        end
+    end)
+    row.scope:Connect(InputService.InputEnded, function(event)
+        if row.drag and not row.container:IsVisible() then row.drag = nil; row:_Paint(); return end
+        if row.drag and (event == row.drag.input or (row.drag.input.UserInputType == Enum.UserInputType.MouseButton1
+            and event.UserInputType == Enum.UserInputType.MouseButton1)) then
+            local value = row.drag.value; row.drag = nil; row:Set(value, true)
+        end
+    end)
+    row.scope:Connect(InputService.InputBegan, function(event, processed)
+        if processed or not row.enabled or row.busy or not row.visible or not row.container:IsVisible()
+            or InputService:GetFocusedTextBox() or game:GetService("GuiService").SelectedObject ~= row.hit then return end
+        if event.KeyCode == Enum.KeyCode.Left then row:Set(row.value - step, true)
+        elseif event.KeyCode == Enum.KeyCode.Right then row:Set(row.value + step, true)
+        elseif event.KeyCode == Enum.KeyCode.Home then row:Set(minimum, true)
+        elseif event.KeyCode == Enum.KeyCode.End then row:Set(maximum, true) end
+    end)
+    row:_Paint(); self:Relayout(); return row
+end
+
+function Controls:Label(input)
+    local row = self:_Create("Label", input); self:Relayout(); return row
+end
+function Controls:Section(input)
+    local row = self:_Create("Section", input); self:Relayout(); return row
+end
+function Controls:Divider()
+    local row = self:_Create("Divider", {Title = ""})
+    row.TitleLabel.Visible, row.DescriptionLabel.Visible = false, false
+    row.line = row.u:Line(row.Root, "DividerLine", 0, 3, 300, 1, C.Border)
+    self:Relayout(); return row
+end
+function Controls:Destroy()
+    if self.dead then return end
+    self.dead = true
+    for _, row in ipairs(table.clone(self.rows)) do row:Destroy() end
+    table.clear(self.rows)
+end
+return Controls
+</ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX369ed65636411a661e"><Properties><string name="Name">LibraryWindow</string><ProtectedString name="Source">--[[
+    通用 UI 库窗口：复用现有金属控件、颜色、素材、角色双视图和拖动逻辑。
+    页面/右侧设置由调用者添加，库不内置训练、传送、购买或授权逻辑。
+    桌面保留三栏；窄窗口把区域上下排列并滚动，文字仍用正常字号。
+]]
+local Cleanup = require(script.Parent.Cleanup)
+local Components = require(script.Parent.Components)
+local Motion = require(script.Parent.Motion)
+local Assets = require(script.Parent.Assets)
+local Defaults = require(script.Parent.Config)
+local Theme = require(script.Parent.Theme)
+local View = require(script.Parent.View)
+local Controls = require(script.Parent.LibraryControls)
+local C = Theme.Colors
+local Window = {}
+Window.__index = Window
+local registry = setmetatable({}, {__mode = "k"})
+local function rect(object, x, y, w, h)
+    object.Position = UDim2.fromOffset(x, y)
+    object.Size = UDim2.fromOffset(math.max(1, w), math.max(1, h))
+end
+local function config(options)
+    local result = table.clone(Defaults)
+    result.AssetIds = table.clone(Defaults.AssetIds)
+    for key, value in pairs(options.AssetIds or {}) do result.AssetIds[key] = value end
+    result.AvatarPreview = table.clone(Defaults.AvatarPreview)
+    if options.AvatarPreview == false then result.AvatarPreview.Enabled = false
+    elseif type(options.AvatarPreview) == "table" then
+        for key, value in pairs(options.AvatarPreview) do result.AvatarPreview[key] = value end
+    end
+    result.DisplayOrder = options.DisplayOrder or Defaults.DisplayOrder
+    return result
+end
+
+-- 构造失败时也回收已创建的连接/实例；重复 Id 恢复原窗口，不堆叠第二套界面。
+function Window.new(options)
+    assert(type(options) == "table", "CreateWindow 参数必须是 table")
+    local player = game:GetService("Players").LocalPlayer
+    assert(player, "JBS UI 库请从客户端 LocalScript 调用")
+    local parent = options.Parent or player:WaitForChild("PlayerGui")
+    local id = options.Id or "JBS_UI"
+    assert(type(id) == "string" and #id &lt;= 64 and id:match("^[%w_-]+$"), "窗口 Id 使用 1–64 个英文字母、数字、下划线或连字符")
+    registry[parent] = registry[parent] or {}
+    local existing = registry[parent][id]
+    if existing and not existing.dead then existing:Show(); return existing, false end
+    local ownerName = "JBSUI_Owner_" .. id
+    local owner = parent:FindFirstChild(ownerName)
+    if owner then
+        if owner:IsA("BindableFunction") and owner:GetAttribute("JBSUILibrary") == true then owner:Invoke("Restore") end
+        return nil, "同 Id 窗口已存在；没有替换或销毁其他界面"
+    end
+    local self = setmetatable({Id = id, parent = parent, player = player, options = options,
+        config = config(options), scope = Cleanup.new(), motion = Motion.new(options.ReducedMotion == true),
+        tabs = {}, tabOrder = {}, controls = {}, sequence = 0, tabSequence = 0, artGaps = {},
+        visible = true, dead = false, controller = {window = "Open", page = "home"}}, Window)
+    self.assets = Assets.new(self.config.AssetIds)
+    self.u = Components.new(self.scope, self.motion, self.assets)
+    local ok, err = pcall(function()
+        self.Screen = self.u:Make("ScreenGui", parent, id, {ResetOnSpawn = false,
+            IgnoreGuiInset = false, DisplayOrder = self.config.DisplayOrder, ZIndexBehavior = Enum.ZIndexBehavior.Sibling})
+        self:_Build()
+        self.owner = self.u:Make("BindableFunction", parent, ownerName)
+        self.owner:SetAttribute("JBSUILibrary", true)
+        self.owner.OnInvoke = function(command)
+            if command == "Restore" then self:Show(); return true end
+            return false
+        end
+        self.scope:Connect(self.Screen.Destroying, function() self:Destroy() end)
+        if options.Hotkey then
+            local input = game:GetService("UserInputService")
+            self.scope:Connect(input.InputBegan, function(event, processed)
+                if not processed and not input:GetFocusedTextBox() and event.KeyCode == options.Hotkey then
+                    self:SetVisible(not self.visible)
+                end
+            end)
+        end
+        self:SetActions({Start = options.OnStart, Stop = options.OnStop})
+        self:Resize()
+        self.assets:Load(function() if not self.dead then self:_RefreshArt() end end)
+    end)
+    if not ok then self:Destroy(); error(err, 2) end
+    registry[parent][id] = self
+    return self, true
+end
+
+function Window:_Scroller(parent, name)
+    return self.u:Make("ScrollingFrame", parent, name, {BackgroundTransparency = 1, BorderSizePixel = 0,
+        ScrollBarThickness = 4, ScrollBarImageColor3 = C.Light, ClipsDescendants = true,
+        CanvasSize = UDim2.fromOffset(0, 0), ScrollingDirection = Enum.ScrollingDirection.Y})
+end
+function Window:_Art(parent, name, key, x, y, w, h)
+    local note = self.u:Text(parent, name .. "Pending", "JBS\n美术资源待上传", x, y, w, h, 18, C.Muted, true)
+    note.TextXAlignment, note.TextWrapped = Enum.TextXAlignment.Center, true
+    table.insert(self.artGaps, {label = note, key = key})
+    return self.u:Art(parent, name, key, x, y, w, h)
+end
+function Window:_Build()
+    local u = self.u
+    self.viewport = self:_Scroller(self.Screen, "WindowViewport")
+    self.viewport.Size = UDim2.fromScale(1, 1)
+    self.root = u:Box(self.viewport, "JBSLibraryWindow", 0, 0, 1672, 941)
+    self.shell = u:Panel(self.root, "Shell", 0, 0, 1672, 941)
+    self.topbar = u:Panel(self.root, "Topbar", 258, 0, 1414, 60, "card")
+    self.title = u:Text(self.topbar, "Title", self.options.Title or "JBS · MUSCLE LEGENDS", 22, 5, 620, 48, 20, C.Light, true)
+    self.dragHandle = u:Interact(self.topbar, "DragHandle", 10, 0, 900, 60, function() end)
+    self.dragHandle.Selectable = false
+    self.windowButtons = {}
+    for _, spec in ipairs({
+        {"Minimize", "—", function() self:Hide() end},
+        {"Resize", "□", function() self.expanded = not self.expanded; self:Resize() end},
+        {"Close", "×", function() self:Hide() end},
+    }) do
+        local label = u:Text(self.topbar, spec[1] .. "Label", spec[2], 0, 5, 54, 46, 25, C.White)
+        label.TextXAlignment = Enum.TextXAlignment.Center
+        table.insert(self.windowButtons, {label = label, hit = u:Interact(self.topbar, spec[1], 0, 5, 54, 46, spec[3])})
+    end
+    self.sidebar = u:Panel(self.root, "Sidebar", 0, 0, 246, 914)
+    self.logo = self:_Art(self.sidebar, "Logo", "logo_jbs", 8, 6, 230, 147)
+    self.navigation = self:_Scroller(self.sidebar, "Navigation")
+    self.center = self:_Scroller(self.root, "Center")
+    self.hero = u:Panel(self.center, "HeroFrame", 0, 0, 1076, 310)
+    if self.config.AvatarPreview.Enabled ~= false then
+        if self.config.AvatarPreview.BackEnabled ~= false then require(script.Parent.AvatarSidebarView).Build(self, self.sidebar) end
+        require(script.Parent.AvatarHeroView).Build(self)
+    else
+        self:_Art(self.hero, "Hero", "hero_clean", 3, 3, 1070, 304)
+        self:_Art(self.sidebar, "SidebarArt", "sidebar_clean", 0, 629, 246, 245)
+    end
+    self.brandClose = u:Text(self.sidebar, "BrandClose", "力量不止 · 传奇永在", 10, 875, 226, 24, 16, C.Light)
+    self.pagesPanel = u:Panel(self.center, "Pages", 0, 322, 1076, 350)
+    self.pageTitle = u:Text(self.pagesPanel, "PageTitle", "添加页面开始使用", 20, 8, 800, 32, 20, C.White, true)
+    self.pageHost = u:Box(self.pagesPanel, "PageHost", 16, 50, 1044, 284)
+    self.controlPanel = u:Panel(self.root, "Controls", 258, 752, 1076, 162)
+    u:Heading(self.controlPanel, self.options.ControlsTitle or "脚本控制", nil, "bolt")
+    self.start = u:Button(self.controlPanel, "Start", "开始脚本", 20, 45, 390, 64,
+        function() self:_Action("Start") end, true)
+    self.stop = u:Button(self.controlPanel, "Stop", "停止脚本", 424, 45, 390, 64,
+        function() self:_Action("Stop") end)
+    self.feedback = self:_Scroller(self.controlPanel, "Feedback")
+    self.feedback.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    self.banner = u:Text(self.feedback, "Message", "", 0, 0, 760, 34, 14, C.Light)
+    self.banner.TextWrapped, self.banner.TextTruncate = true, Enum.TextTruncate.None
+    self.banner.AutomaticSize, self.banner.LineHeight = Enum.AutomaticSize.Y, 1.4
+    self.statusPanel = u:Panel(self.root, "Status", 1346, 76, 326, 300)
+    u:Heading(self.statusPanel, "脚本状态", nil, "status")
+    self.statusRows = {}
+    for i, id in ipairs({"connection", "script", "version"}) do
+        self.statusRows[id] = View.StatusRow(self, self.statusPanel, id, ({"game", "settings", "version"})[i], 52 + (i - 1) * 78, "", "", "")
+    end
+    self:SetStatus("connection", {Title = "界面已创建", Detail = "游戏连接由接入方提供", Badge = "UI"})
+    self:SetStatus("script", {Title = "等待操作", Detail = "只执行你绑定的回调", Badge = "就绪"})
+    self:SetStatus("version", {Title = "JBS UI 1.0.0", Detail = "本地库版本", Badge = "本地"})
+    self.settingsPanel = u:Panel(self.root, "Settings", 1346, 388, 326, 330)
+    u:Heading(self.settingsPanel, self.options.SettingsTitle or "脚本设置", nil, "settings")
+    self.settingsHost = self:_Scroller(self.settingsPanel, "SettingsContent")
+    self.settings = Controls.new(self, self.settingsHost, 1)
+    self.userPanel = u:Panel(self.root, "User", 1346, 752, 326, 150)
+    u:Icon(self.userPanel, "crown", 20, 18, 34)
+    self.username = u:Text(self.userPanel, "Username", self.player.DisplayName, 66, 14, 240, 30, 18, C.White, true)
+    self.tag = u:Text(self.userPanel, "Tag", self.options.UserTag or "当前玩家", 66, 46, 240, 24, 14, C.Muted)
+    self.quote = u:Text(self.userPanel, "Quote", "MORE POWER · MORE POSSIBILITIES", 18, 88, 290, 42, 14, C.Light)
+    self.quote.TextWrapped = true
+    self.footer = u:Text(self.root, "Footer", self.options.Footer or "The Best Clan In Muscle Legend", 258, 915, 1414, 22, 13, C.Light)
+    self.footer.TextXAlignment = Enum.TextXAlignment.Center
+    self.restore = u:Button(self.Screen, "Restore", "恢复 JBS", 16, 16, 170, 52, function() self:Show() end, true)
+    self.restore.root.Visible = false
+    self.scope:Connect(self.viewport:GetPropertyChangedSignal("AbsoluteSize"), function() self:Resize() end)
+    View.BindDragging(self)
+end
+
+function Window:_RefreshArt()
+    for _, gap in ipairs(self.artGaps) do gap.label.Visible = self.assets.status[gap.key] ~= "已加载" end
+    -- 紧凑布局没有左侧装饰位，不让异步加载完成重新显示隐藏的图片。
+    if self.compact then
+        self.logo.Visible = false; self.sidebar.LogoPending.Visible = false
+        local art, note = self.sidebar:FindFirstChild("SidebarArt"), self.sidebar:FindFirstChild("SidebarArtPending")
+        if art then art.Visible = false end
+        if note then note.Visible = false end
+    end
+    self:RefreshAvatarVisibility()
+end
+function Window:RefreshAvatarVisibility()
+    if not self.heroAvatar then return end
+    View.RefreshAvatarVisibility(self)
+end
+
+function Window:Resize()
+    if self.dead or not self.viewport then return end
+    local size = self.viewport.AbsoluteSize
+    if size.X &lt;= 0 or size.Y &lt;= 0 then return end
+    local w = math.max(280, math.min(self.expanded and size.X - 16 or 1672, size.X - 16))
+    local h = math.max(704, math.min(941, size.Y - 16))
+    self.compact = w &lt; 1000
+    local left, right = w &lt; 1500 and 176 or 246, w &lt; 1500 and 288 or 326
+    local centerX, centerW = left + 12, w - left - right - 24
+    local centerY, centerH, heroH = 62, h - 254, w &lt; 1500 and 235 or 310
+    local sideX, sideY, sideW, sideH = 0, 0, left, h - 27
+    local rightX, statusY, statusH = w - right, 76, 288
+    local settingsY, settingsH, userY, userH = 376, math.max(150, h - 553), h - 165, 138
+    local controlY = h - 189
+    if self.compact then
+        -- 手机/窄窗只改变排列，不把全页字体一起缩小。
+        sideX, sideY, sideW, sideH = 0, 72, w, 132
+        centerX, centerW, centerY, centerH, heroH = 0, w, 216, 600, math.max(170, w * 0.29)
+        controlY = centerY + centerH + 12
+        rightX, right, statusY, statusH = 0, w, controlY + 174, 288
+        settingsY, settingsH = statusY + statusH + 12, 320
+        userY, userH = settingsY + settingsH + 12, 138
+        h = userY + userH + 28
+    end
+    self.layout = {width = w, height = h, centerWidth = centerW, compact = self.compact}
+    local function panel(object, x, y, width, height)
+        object.Position = UDim2.fromOffset(x, y); self.u:ResizePanel(object, width, height)
+    end
+    rect(self.root, math.max(8, (size.X - w) / 2), 8, w, h)
+    self.homePosition = self.root.Position
+    panel(self.shell, 0, 0, w, h)
+    self.viewport.CanvasSize = UDim2.fromOffset(0, h + 16)
+    local topX, topW = self.compact and 0 or centerX, self.compact and w or w - centerX
+    panel(self.topbar, topX, 0, topW, 60)
+    rect(self.title, 22, 5, topW - 206, 48)
+    rect(self.dragHandle, 10, 0, topW - 190, 60)
+    for i, button in ipairs(self.windowButtons) do
+        rect(button.label, topW - 178 + (i - 1) * 56, 5, 54, 46)
+        rect(button.hit, topW - 178 + (i - 1) * 56, 5, 54, 46)
+    end
+    panel(self.sidebar, sideX, sideY, sideW, sideH)
+    local navY, navH = self.compact and 12 or 146, self.compact and 108 or math.max(100, sideH - 410)
+    rect(self.navigation, 8, navY, sideW - 16, navH)
+    self.logo.Visible = not self.compact and self.assets.status.logo_jbs == "已加载"
+    self.sidebar.LogoPending.Visible = not self.compact and self.assets.status.logo_jbs ~= "已加载"
+    rect(self.logo, 5, 5, sideW - 10, 132)
+    rect(self.sidebar.LogoPending, 10, 10, sideW - 20, 120)
+    local sideArt = self.sidebar:FindFirstChild("SidebarArt")
+    if sideArt then
+        local artH = math.min(245, sideW)
+        rect(sideArt, 0, sideH - artH - 39, sideW, artH)
+        sideArt.Visible = not self.compact and (self.heroAvatar ~= nil or self.assets.status.sidebar_clean == "已加载")
+        local note = self.sidebar:FindFirstChild("SidebarArtPending")
+        if note then rect(note, 0, sideH - artH - 39, sideW, artH); note.Visible = not self.compact and not self.heroAvatar and self.assets.status.sidebar_clean ~= "已加载" end
+    end
+    self.brandClose.Visible = not self.compact
+    rect(self.brandClose, 10, sideH - 32, sideW - 20, 24)
+    local navOffset = 0
+    for _, tab in ipairs(self.tabOrder) do
+        local titleWidth = sideW - 44
+        local bounds = game:GetService("TextService"):GetTextSize(tab.Title, 18, Theme.Bold, Vector2.new(titleWidth, 100000))
+        local rowHeight = math.max(54, math.ceil(bounds.Y * 1.4) + 16)
+        panel(tab.nav.root, 0, navOffset, sideW - 16, rowHeight)
+        rect(tab.nav.label, 14, 8, titleWidth, rowHeight - 16)
+        tab.nav.label.TextSize, tab.nav.label.TextWrapped, tab.nav.label.TextTruncate = 18, true, Enum.TextTruncate.None
+        rect(tab.nav.button, 0, 0, sideW - 16, rowHeight)
+        navOffset += rowHeight + 10
+    end
+    self.navigation.CanvasSize = UDim2.fromOffset(0, navOffset)
+    rect(self.center, centerX, centerY, centerW, centerH)
+    panel(self.hero, 0, 0, centerW, heroH)
+    rect(self.hero.Hero, 3, 3, centerW - 6, heroH - 6)
+    local heroPending = self.hero:FindFirstChild("HeroPending")
+    if heroPending then rect(heroPending, 20, 20, centerW - 40, heroH - 40) end
+    local pageH = math.max(260, centerH - heroH - 12)
+    panel(self.pagesPanel, 0, heroH + 12, centerW, pageH)
+    rect(self.pageTitle, 20, 8, centerW - 40, 32)
+    rect(self.pageHost, 16, 50, centerW - 32, pageH - 66)
+    self.center.CanvasSize = UDim2.fromOffset(0, heroH + 12 + pageH)
+    for _, tab in ipairs(self.tabOrder) do
+        rect(tab.Root, 0, 0, centerW - 32, pageH - 66)
+        tab:Relayout(centerW - 40)
+    end
+    panel(self.controlPanel, centerX, controlY, centerW, 162)
+    local buttonW = (centerW - 54) / 2
+    for index, button in ipairs({self.start, self.stop}) do
+        panel(button.root, 20 + (index - 1) * (buttonW + 14), 45, buttonW, 64)
+        rect(button.button, 0, 0, buttonW, 64); rect(button.label, 12, 0, buttonW - 24, 64)
+        button.label.TextSize = 18
+    end
+    rect(self.feedback, 24, 115, centerW - 48, 36)
+    rect(self.banner, 0, 0, centerW - 56, 34)
+    panel(self.statusPanel, rightX, statusY, right, statusH)
+    for index, id in ipairs({"connection", "script", "version"}) do
+        local row, y = self.statusRows[id], 52 + (index - 1) * 78
+        rect(row.icon, 18, y + 15, 28, 28)
+        rect(row.title, 58, y, right - 140, 26)
+        rect(row.detail, 58, y + 28, right - 140, 44)
+        row.title.TextSize, row.detail.TextSize = 18, 14
+        row.detail.TextWrapped, row.detail.TextTruncate = true, Enum.TextTruncate.None
+        rect(row.badge, right - 68, y + 3, 50, 26); row.badge.TextSize = 13
+        rect(row.separator, 18, y + 74, right - 36, 1)
+    end
+    panel(self.settingsPanel, rightX, settingsY, right, settingsH)
+    rect(self.settingsHost, 12, 48, right - 24, settingsH - 62)
+    self.settings:Relayout(right - 32)
+    panel(self.userPanel, rightX, userY, right, userH)
+    rect(self.username, 66, 14, right - 84, 30); rect(self.tag, 66, 46, right - 84, 24)
+    rect(self.quote, 18, 88, right - 36, 42)
+    rect(self.footer, 16, h - 25, w - 32, 22)
+    self:RefreshAvatarVisibility()
+end
+
+function Window:Tab(options)
+    assert(not self.dead, "窗口已销毁")
+    if type(options) == "string" then options = {Title = options} end
+    options = options or {}
+    self.tabSequence += 1
+    local id = options.Id or ("tab_" .. self.tabSequence)
+    assert(type(id) == "string" and id ~= "" and not self.tabs[id], "Tab.Id 为空或重复")
+    local columns = options.Columns or 1
+    assert(columns == 1 or columns == 2 or columns == 3, "Columns 只能是 1、2、3")
+    assert(options.Title == nil or type(options.Title) == "string", "Tab.Title 必须是字符串")
+    local root = self:_Scroller(self.pageHost, "Page_" .. id)
+    root.Visible = false
+    local tab = Controls.new(self, root, columns)
+    tab.Id, tab.Title, tab.Root = id, options.Title or id, root
+    tab.navScope = Cleanup.new()
+    tab.nav = Components.new(tab.navScope, self.motion, self.assets):Button(self.navigation,
+        "Tab_" .. id, tab.Title, 0, 0, 230, 62, function() self:SelectTab(id) end)
+    tab.Destroy = function()
+        if self.tabs[id] == tab then return self:RemoveTab(id) end
+        return false -- 旧 Tab 引用不能销毁后来复用了同一 Id 的新 Tab。
+    end
+    self.tabs[id] = tab; table.insert(self.tabOrder, tab)
+    if not self.activeTab then self:SelectTab(id) end
+    self:Resize()
+    return tab
+end
+function Window:RemoveTab(id)
+    local tab = self.tabs[id]
+    if not tab then return false end
+    Controls.Destroy(tab)
+    tab.navScope:Destroy()
+    for _, object in ipairs(tab.nav.root:GetDescendants()) do self.motion:Cancel(object) end
+    self.assets:UnbindTree(tab.nav.root)
+    tab.nav.root:Destroy(); tab.Root:Destroy()
+    self.tabs[id] = nil
+    table.remove(self.tabOrder, table.find(self.tabOrder, tab))
+    if self.activeTab == id then
+        self.activeTab = nil
+        if not self.dead then
+            if self.tabOrder[1] then self:SelectTab(self.tabOrder[1].Id)
+            else self.pageTitle.Text = "添加页面开始使用" end
+        end
+    end
+    if not self.dead then self:Resize() end
+    return true
+end
+function Window:SelectTab(id)
+    if self.dead or not self.tabs[id] then return false end
+    self.activeTab = id
+    for _, tab in ipairs(self.tabOrder) do
+        tab.Root.Visible = tab.Id == id
+        tab.nav.label.TextColor3 = tab.Id == id and C.Light or C.White
+        for _, control in ipairs(tab.rows) do
+            control.drag = nil
+            if control.kind == "Dropdown" then control.open = false; control:_Paint() end
+            if control.kind == "Slider" then control:_Paint() end
+        end
+        tab:Relayout()
+    end
+    self.pageTitle.Text = self.tabs[id].Title
+    return true
+end
+function Window:Sidebar() return self.settings end
+function Window:GetControl(id) return self.controls[id] end
+function Window:GetValues()
+    local values = {}
+    for id, control in pairs(self.controls) do if control.value ~= nil then values[id] = control.value end end
+    return values
+end
+function Window:SetStatus(id, info)
+    if self.dead then return false end
+    local row = self.statusRows[id]
+    assert(row, "状态 Id 使用 connection、script 或 version")
+    for key, label in pairs({Title = row.title, Detail = row.detail, Badge = row.badge}) do
+        if info[key] ~= nil then label.Text = tostring(info[key]) end
+    end
+    if info.Color then row.badge.BackgroundColor3 = info.Color end
+    return true
+end
+function Window:Notify(message)
+    if self.dead then return false end
+    if type(message) == "string" then message = {Content = message} end
+    self.banner.Text = (message.Title and tostring(message.Title) .. " · " or "") .. tostring(message.Content or "")
+    self.feedback.CanvasPosition = Vector2.zero
+    return true
+end
+function Window:_PaintActions()
+    for _, pair in ipairs({{"Start", self.start}, {"Stop", self.stop}}) do
+        local active = not self.actionBusy and type(self.actions[pair[1]]) == "function"
+        pair[2].button.Active, pair[2].button.Selectable = active, active
+    end
+end
+function Window:SetActions(callbacks)
+    if self.dead then return false end
+    for _, key in ipairs({"Start", "Stop"}) do assert(callbacks[key] == nil or type(callbacks[key]) == "function", key .. " 必须是函数") end
+    self.actions = {Start = callbacks.Start, Stop = callbacks.Stop}
+    self:_PaintActions()
+    if not self.actions.Start and not self.actions.Stop then self:Notify("开始 / 停止回调尚未绑定") end
+    return true
+end
+function Window:_Action(name)
+    if self.dead or self.actionBusy or not self.actions[name] then return false end
+    self.actionBusy = true; self:_PaintActions()
+    local ok, accepted, reason = pcall(self.actions[name], self:GetValues(), self)
+    self.actionBusy = false
+    if self.dead then return false end
+    self:_PaintActions()
+    if not ok or accepted == false then self:Notify({Title = "回调未完成", Content = tostring(ok and reason or accepted)}); return false end
+    self:Notify(name == "Start" and "已调用开始回调" or "已调用停止回调")
+    return true
+end
+function Window:SetVisible(value)
+    if self.dead then return false end
+    self.visible = value == true
+    self.controller.window = self.visible and "Open" or "Closed"
+    self.viewport.Visible, self.restore.root.Visible = self.visible, not self.visible
+    for _, control in pairs(self.controls) do
+        control.drag = nil
+        if control.kind == "Dropdown" then control.open = false; control:_Paint() end
+        if control.kind == "Slider" then control:_Paint() end
+    end
+    for _, tab in ipairs(self.tabOrder) do tab:Relayout() end
+    self.settings:Relayout()
+    self:RefreshAvatarVisibility()
+    return true
+end
+function Window:Show() return self:SetVisible(true) end
+function Window:Hide() return self:SetVisible(false) end
+function Window:SetReducedMotion(value) if not self.dead then self.motion:SetReduced(value == true) end end
+function Window:OnDestroy(callback)
+    assert(type(callback) == "function", "OnDestroy 需要函数")
+    self.scope:Add(callback)
+    return callback
+end
+function Window:Diagnostics()
+    local count = self.scope:Count()
+    for _, tab in ipairs(self.tabOrder) do count += tab.navScope:Count() end
+    local controls = 0
+    for _, control in pairs(self.controls) do
+        controls += 1; count += control.scope:Count() + (control.optionScope and control.optionScope:Count() or 0)
+    end
+    return {destroyed = self.dead, controls = controls, tabs = #self.tabOrder, connections = count,
+        instances = self.dead and 0 or #self.Screen:GetDescendants() + 1,
+        avatar = self.heroAvatar and self.heroAvatar:Diagnostics() or {enabled = false}}
+end
+function Window:Destroy()
+    if self.dead then return end
+    self.dead = true
+    if registry[self.parent] and registry[self.parent][self.Id] == self then registry[self.parent][self.Id] = nil end
+    if self.settings then self.settings:Destroy() end
+    for _, tab in ipairs(table.clone(self.tabOrder)) do self:RemoveTab(tab.Id) end
+    self.scope:Destroy()
+    self.motion:Destroy()
+    self.assets:Destroy()
+    if self.owner then self.owner.OnInvoke = nil; self.owner:Destroy() end
+    if self.Screen then self.Screen:Destroy() end
+    table.clear(self.tabs); table.clear(self.tabOrder); table.clear(self.controls)
+end
+return Window
 </ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBXcbac9938634bf772aa"><Properties><string name="Name">Motion</string><ProtectedString name="Source">--[[
     动效管理：基于 Roblox TweenService 平滑改变位置和颜色。
     一个对象同时只允许一个本模块动画；新动画会取消旧动画。

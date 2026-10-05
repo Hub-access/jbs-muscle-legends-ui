@@ -1,23 +1,23 @@
 [
   {
     "path": "JBS_Reference05.client.lua",
-    "bytes": 176852,
-    "sha256": "38e1e2164d11bfd61754457f7fdb5a5e8ddc24555b678b8a4feaeb8479309d94"
+    "bytes": 227767,
+    "sha256": "1cbb7441dfee8c02fd93ce25e2447d1f1a3f45b3eada24c62f76296288178b89"
   },
   {
     "path": "JBS_Reference05.rbxlx",
-    "bytes": 210680,
-    "sha256": "e875334d93b61a06afbefdaa8c2aed2fd6bcfd6a4dc4dab64576145e23bc3475"
+    "bytes": 262150,
+    "sha256": "257bd4d1a8c3db86e8055d2d76d9b7b38e3c40006fd10c96b7e914fd4428bb25"
   },
   {
     "path": "JBS_Reference05.rbxmx",
-    "bytes": 180881,
-    "sha256": "9cf949871eedc6cfbab9e96b865e79f1d12b48866b14f1072ac5a3a3bb1f1ff5"
+    "bytes": 232351,
+    "sha256": "d49d0a7660120417dd648463600684ff2b2d3fb7da6d70da8bc2933c449a1cc3"
   },
   {
     "path": "README.md",
-    "bytes": 11053,
-    "sha256": "44759a1a1f314d67a001c8fb9bdba3e9ed8ada8e2933fd893d1a318c2bc0baa6"
+    "bytes": 11297,
+    "sha256": "014f4c907e5fa8a8c0a77d44553d46a92275cfead46807d8d2ef0fbfb67a3d49"
   },
   {
     "path": "assets/control_art.png",
@@ -100,6 +100,11 @@
     "sha256": "63575d54d8aad430bc95305ae98295069d75a6b02fecbd6627920a42790404bc"
   },
   {
+    "path": "evidence/library-verification.json",
+    "bytes": 319,
+    "sha256": "2e730aff6f2bfe1ed97ceae6dc3a81204a060dc009ac29333a4c9226a2c64c43"
+  },
+  {
     "path": "evidence/name-alignment.json",
     "bytes": 425,
     "sha256": "860489cfff8d1d96fd44235befec3f378ee7debe1a5b85d3f730088a8c954037"
@@ -115,24 +120,29 @@
     "sha256": "ffc090ebf0dbd4d909603264f22dc52d2d47be59db44736aef85ebf696e6ac2e"
   },
   {
+    "path": "evidence/offline-library-tests.txt",
+    "bytes": 334,
+    "sha256": "af84a3b1a81e1a5615cbd0c1a687256cb3c81dfaa534a5cbbb85759da9245b2a"
+  },
+  {
     "path": "evidence/offline-tests.txt",
     "bytes": 376,
-    "sha256": "425b6425fd9c54a9bbd20d51daac247f813828af8e4f0c1ebc39cacab74626b2"
+    "sha256": "57bb6513c527c26db6ff1ee9ca7673bc3dc689685b059c5f7292b2df390fdf1c"
   },
   {
     "path": "evidence/stage2-package-checks.json",
     "bytes": 534,
-    "sha256": "4296ee1c5a5b1ed64bade322b59a1a2fb03533f3e014c6ae75a846e0f1be6e29"
+    "sha256": "51920e5b016a50376836631e16042317dd72679c143c64ae23ea62a2ba6134c8"
   },
   {
     "path": "evidence/stage2-report.json",
-    "bytes": 3055,
-    "sha256": "907e7f7528325cf539884a7c04cac3c3b3c763cfa13c01d48f8b5824511468fd"
+    "bytes": 3143,
+    "sha256": "a11fb902aeb5b6e9a8b8961b2cae0d2350d0a40f57ae7c4e69516837b517889e"
   },
   {
     "path": "evidence/verification.json",
     "bytes": 655,
-    "sha256": "91a2d7ea051a5b5feb6ee76c010d363ee8ca4a07984f323979a338d5d3318bfa"
+    "sha256": "41362e562b6bf87b851bd6007ea84a4d492e1cc2720c6656cbf07ffeadaaf2f4"
   },
   {
     "path": "reference/JBS_reference_05.png",
@@ -146,8 +156,8 @@
   },
   {
     "path": "src/Assets.lua",
-    "bytes": 2942,
-    "sha256": "8c4c8e8db493a1032ed4fe98cb1a3f986f598435ba1b0a241d7a5a19d5ceb6c4"
+    "bytes": 3387,
+    "sha256": "8ceb72d722a50520772def4b4c50d1b242afa57f440aeb35601f8070512d0878"
   },
   {
     "path": "src/AvatarAccountRequest.lua",
@@ -240,6 +250,21 @@
     "sha256": "b2c2249ab10f06ecd8ace13eba00d8e0013054ec24d266d5eb48385c6d17cbd0"
   },
   {
+    "path": "src/Library.lua",
+    "bytes": 753,
+    "sha256": "52289f750bf2c152653c53abc400a746a1ffb4c806c9e32d1652b7705f344e84"
+  },
+  {
+    "path": "src/LibraryControls.lua",
+    "bytes": 25043,
+    "sha256": "6746e8bff59692e9c1bc045acc08c82729a8420534917c8e22f1174d2fcda6aa"
+  },
+  {
+    "path": "src/LibraryWindow.lua",
+    "bytes": 24633,
+    "sha256": "2fa61d739fd3c7a5ea17a9d9d5745b58e77ebfd1009f564e4f12429894489576"
+  },
+  {
     "path": "src/Motion.lua",
     "bytes": 2930,
     "sha256": "7a29f22851b9fbf406dfade32152c2b036523bde76e84d8236007e40e7d2f4d8"
@@ -300,14 +325,19 @@
     "sha256": "577134bf0847cfaf65261bf95d5da920a706357423c01f5a622d99ddc453c1eb"
   },
   {
+    "path": "tests/library-stress.luau",
+    "bytes": 14014,
+    "sha256": "cdbac51b9ebf3c930e37f58b278d9a7705a8225181a0475fcb5ecc3c140699ad"
+  },
+  {
     "path": "tests/mock-engine.luau",
     "bytes": 6714,
     "sha256": "49f80c3736ebe3319c67cabf3b75f9b2c43fe22749ce82c10d9a5362ded9af49"
   },
   {
     "path": "tests/modules.bundle.luau",
-    "bytes": 177079,
-    "sha256": "de94b3e3e28b46038423f7adcfec06bbe28b18a7f50c23271b1125f4b59625e5"
+    "bytes": 228027,
+    "sha256": "12ac96b80ff56a4959aa6f01752ad9911cf103bc61aa1bb27d3ae372fd932ea6"
   },
   {
     "path": "tests/stress.luau",
@@ -316,8 +346,8 @@
   },
   {
     "path": "tools/build.py",
-    "bytes": 4579,
-    "sha256": "0a9de4484c258590769bd3a1fc039ac62d19dec8e6059c58c79b053a492cc56c"
+    "bytes": 5725,
+    "sha256": "9e7f921e5c628dfec6c583bbdc527a57a3cd7c5bf84a8e4ca08574563d038670"
   },
   {
     "path": "tools/check_stage2_package.py",
@@ -345,6 +375,11 @@
     "sha256": "91725b224f232c5901f5e76943cf4b7f3bc29437beef4c8604fbc4fb532a9db1"
   },
   {
+    "path": "tools/test_library.py",
+    "bytes": 3130,
+    "sha256": "97e325fd8c34643fb22b22abd307f571fa04af2adbc03fa4ecab584bd2236eb8"
+  },
+  {
     "path": "先读我_代码导览.md",
     "bytes": 5720,
     "sha256": "b99df667a7f3d33c532900f66a2540f2a6d7406dc0822e7c512ba5abe8f0542a"
@@ -356,8 +391,8 @@
   },
   {
     "path": "第二阶段_正背面同步_说明.md",
-    "bytes": 11049,
-    "sha256": "a6ca359b650ac944e5ef61a5d4d124c402072102d346732ac0ccb2f3711441be"
+    "bytes": 11073,
+    "sha256": "7da231172607fff59cbe7840d36558376bd49d6f369d89162584ea49aa6154c0"
   },
   {
     "path": "第二阶段_资源清单.md",

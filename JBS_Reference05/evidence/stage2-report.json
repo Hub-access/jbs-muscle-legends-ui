@@ -3,7 +3,7 @@
   "stage": 2,
   "conclusion": "第二阶段代码及离线检查完成，原生和资源接入仍待验证",
   "method": "Luau compiler + real Luau CLI executing project API test doubles; not Roblox",
-  "compiled_files": 28,
+  "compiled_files": 31,
   "offline": {
     "ui": {
       "status": "passed",
@@ -58,7 +58,7 @@
   "package_checks": {
     "method": "XML/source equality, default-disabled QA, PNG hashes/sizes; not Roblox execution",
     "generated_modules_match_source": true,
-    "modules_per_entry": 23,
+    "modules_per_entry": 26,
     "entries_checked": [
       "JBS_Reference05.rbxmx",
       "JBS_Reference05.rbxlx"
@@ -74,5 +74,6 @@
     "native_render": "not_verified"
   },
   "next_stage": "not_started; awaiting user confirmation",
-  "distribution": "Public current-version-only package; historical source and baseline logs not included"
+  "distribution": "Public current-version-only package; historical source and baseline logs not included",
+  "library_note": "UI library added; existing preset and shared avatar code preserved"
 }

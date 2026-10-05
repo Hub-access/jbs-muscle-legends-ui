@@ -1,3 +1,5 @@
+> UI 库入口已提供：[单文件](../JBS_UI.lua)、[导入模块](../JBS_UI.rbxmx)、[中文文档](../UI库使用说明.md)。以下是当前完整预设的说明；自定义页面使用 `CreateWindow`，当前预设使用 `CreateJBS`。
+
 # JBS 图五 · Roblox 原生 Luau 工程
 
 ## 当前更新：当前玩家正背面同步，第二阶段代码交付

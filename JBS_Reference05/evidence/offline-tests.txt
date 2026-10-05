@@ -1,4 +1,4 @@
 Offline Luau test double, NOT a Roblox native test.
-WARNING	JBS destroy cleanup:	train: <LOCAL_PROJECT>/work/JBS_Reference05/run.generated.luau:5095: injected stop failure
+WARNING	JBS destroy cleanup:	train: <LOCAL_PROJECT>/work/JBS_Reference05/run.generated.luau:6108: injected stop failure
 PASS	364	assertions; 120 page changes; 120 hide/restore cycles; 200 toggles; 100 duplicate starts; 50 start/stop cycles
 MOCK ONLY: initial instances	1956	connections	507	native rendering/FPS not measured

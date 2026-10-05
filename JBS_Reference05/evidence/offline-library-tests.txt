@@ -1,0 +1,4 @@
+Offline library engine double, NOT Roblox native testing.
+PASS exported library require is inert
+PASS	117	library assertions; inert require, callbacks, controls, dropdown refresh, slider input, lifecycle, responsive layout decisions, shared avatars
+OFFLINE ONLY: no native screenshot, font rendering, mobile touch or FPS measurement.

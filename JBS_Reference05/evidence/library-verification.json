@@ -1,0 +1,11 @@
+{
+  "library_version": "1.0.0",
+  "library_offline_status": "passed",
+  "exported_module_require": "inert",
+  "source_model_demo_equality": "passed",
+  "example_compile_files": 3,
+  "native_runtime": "not_verified",
+  "native_performance": "not_measured",
+  "resource_uploads": "pending",
+  "offline_assertions": 117
+}

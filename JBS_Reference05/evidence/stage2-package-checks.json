@@ -1,7 +1,7 @@
 {
   "method": "XML/source equality, default-disabled QA, PNG hashes/sizes; not Roblox execution",
   "generated_modules_match_source": true,
-  "modules_per_entry": 23,
+  "modules_per_entry": 26,
   "entries_checked": [
     "JBS_Reference05.rbxmx",
     "JBS_Reference05.rbxlx"

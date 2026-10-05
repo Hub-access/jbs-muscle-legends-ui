@@ -19,7 +19,7 @@ def bundle(bootstrap):
     return ''.join(parts)
 startup='local app=requireModule("Runtime").Mount()\nif app then app.Scope:Connect(script.Destroying,function() app.Destroy() end) end\n'
 (ROOT/'JBS_Reference05.client.lua').write_text(bundle(startup))
-(ROOT/'tests/modules.bundle.luau').write_text(bundle('return {Runtime=requireModule("Runtime"),Controller=requireModule("Controller"),Adapter=requireModule("BusinessAdapter"),Motion=requireModule("Motion"),Assets=requireModule("Assets"),AvatarSnapshot=requireModule("AvatarSnapshot"),AvatarFit=requireModule("AvatarFit"),AvatarRefresh=requireModule("AvatarRefresh"),HeroAvatar=requireModule("HeroAvatar")}\n'))
+(ROOT/'tests/modules.bundle.luau').write_text(bundle('return {Library=requireModule("Library"),Runtime=requireModule("Runtime"),Controller=requireModule("Controller"),Adapter=requireModule("BusinessAdapter"),Motion=requireModule("Motion"),Assets=requireModule("Assets"),AvatarSnapshot=requireModule("AvatarSnapshot"),AvatarFit=requireModule("AvatarFit"),AvatarRefresh=requireModule("AvatarRefresh"),HeroAvatar=requireModule("HeroAvatar")}\n'))
 def item(parent,kind,name,source=None):
     el=ET.SubElement(parent,'Item',{'class':kind,'referent':'RBX'+hashlib.sha256((kind+name).encode()).hexdigest()[:18]})
     props=ET.SubElement(el,'Properties');ET.SubElement(props,'string',{'name':'Name'}).text=name
@@ -53,4 +53,22 @@ spawn_props=test_part('SpawnLocation','JBS_QA_Spawn',(6,1,6),(0,0,0))
 ET.SubElement(spawn_props,'bool',{'name':'Neutral'}).text='true'
 ET.SubElement(spawn_props,'float',{'name':'Duration'}).text='0'
 ET.ElementTree(place).write(ROOT/'JBS_Reference05.rbxlx',encoding='utf-8',xml_declaration=True)
+# 可复用库入口：只有 return，不含 Runtime.Mount 或自动执行的 LocalScript。
+package=ROOT.parent
+library_source=bundle('return requireModule("Library")\n')
+(package/'JBS_UI.lua').write_text(library_source)
+library_model=ET.Element('roblox',{'version':'4'})
+item(library_model,'ModuleScript','JBS_UI',library_source)
+ET.ElementTree(library_model).write(package/'JBS_UI.rbxmx',encoding='utf-8',xml_declaration=True)
+# 单独的 Studio 示例场景：导入模型不会自启动；只有打开此演示场景 Play 才运行示例。
+demo=ET.Element('roblox',{'version':'4'})
+storage=item(demo,'ReplicatedStorage','ReplicatedStorage')
+item(storage,'ModuleScript','JBS_UI',library_source)
+demo_starter=item(demo,'StarterPlayer','StarterPlayer')
+demo_scripts=item(demo_starter,'StarterPlayerScripts','StarterPlayerScripts')
+example=package/'examples/QuickStart.client.lua'
+if example.exists():
+    item(demo_scripts,'LocalScript','JBS_UI_Example',example.read_text())
+    demo.append(workspace)
+    ET.ElementTree(demo).write(package/'examples/JBS_UI_Demo.rbxlx',encoding='utf-8',xml_declaration=True)
 print('Built native module model, local place, and single-file entry from identical sources.')
